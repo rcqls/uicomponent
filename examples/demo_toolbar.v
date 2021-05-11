@@ -28,12 +28,14 @@ fn main() {
 			spacing: .05
 		}, [
 			uic.toolbar(
-			widths: [50., 50., 2 * ui.stretch, 50., ui.stretch, 50.]
-			heights: 20.
-			spacing: 10.
-			items: [ui.button(id: 'left1', text: 'toto'), ui.button(id: 'left2', text: 'toto2'),
-				ui.spacing({}), ui.button(id: 'btn2', text: 'tata'), ui.spacing({}),ui.button(id: 'btn3', text: 'tati')]
-		),
+				widths: [.1, .1, 2 * ui.stretch, .1, ui.stretch, .1]
+				heights: .1
+				items: [ui.button(id: 'left1', text: 'toto', padding: .1, radius: .25),
+					ui.button(id: 'left2', text: 'toto2'), ui.spacing({}),
+					ui.button(id: 'btn2', text: 'tata'), ui.spacing({}),
+					ui.button(id: 'btn3', text: 'tati'),
+				]
+			),
 		]),
 	])
 	app.window = window
