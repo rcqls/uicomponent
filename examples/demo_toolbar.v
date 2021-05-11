@@ -26,14 +26,13 @@ fn main() {
 		ui.column({
 			margin_: .05
 			spacing: .05
-			heights: [8 * ui.stretch, ui.stretch, ui.stretch]
 		}, [
 			uic.toolbar(
-			widths: [100., 100., ui.stretch, 100.]
+			widths: [50., 50., 2 * ui.stretch, 50., ui.stretch, 50.]
 			heights: 20.
 			spacing: 10.
 			items: [ui.button(id: 'left1', text: 'toto'), ui.button(id: 'left2', text: 'toto2'),
-				ui.space, ui.button(id: 'btn2', text: 'tata')]
+				ui.spacing({}), ui.button(id: 'btn2', text: 'tata'), ui.spacing({}),ui.button(id: 'btn3', text: 'tati')]
 		),
 		]),
 	])
