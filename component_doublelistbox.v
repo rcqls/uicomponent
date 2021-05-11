@@ -40,7 +40,9 @@ pub fn doublelistbox(c DoubleListBoxConfig) &ui.Stack {
 		spacing: .05
 	}, [
 		lb_left,
-		ui.column({ widths: ui.stretch, heights: ui.compact, spacing: 10 }, [btn_right, btn_left, btn_clear]),
+		ui.column({ widths: ui.stretch, heights: ui.compact, spacing: 10 }, [btn_right, btn_left,
+			btn_clear,
+		]),
 		lb_right,
 	])
 	dbl_lb := &DoubleListBox{

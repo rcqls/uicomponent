@@ -33,7 +33,7 @@ fn main() {
 			heights: 20.
 			spacing: 10.
 			items: [ui.button(id: 'left1', text: 'toto'), ui.button(id: 'left2', text: 'toto2'),
-				ui.spacing({}), ui.button(id: 'btn2', text: 'tata')]
+				ui.space, ui.button(id: 'btn2', text: 'tata')]
 		),
 		]),
 	])
