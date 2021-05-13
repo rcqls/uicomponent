@@ -3,11 +3,12 @@ module uicomponent
 import ui
 import gx
 import gg
+import sokol.sgl
 
 [heap]
 struct ColorBox {
 mut:
-	buf 	   	[]byte
+	simg		C.sg_image
 	h 			f64
 	s           f64
 	v 			f64
@@ -58,6 +59,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 
 fn colorbox_init(layout &ui.Stack) {
 	mut cb := component_colorbox(layout)
+	cb.simg=create_texture(256,256)
 	cb.update_buffer()
 }
 
@@ -67,50 +69,66 @@ fn draw_h(c &ui.CanvasLayout, app voidptr) {
 	}
 }
 
-pub fn (mut cb ColorBox) update_buffer() {
-	sz := 256 * 256
-	mut col := gx.Color{}
-	cb.buf.clear()
-	mut x, mut y := 0, 0
-	for i in  0 .. sz {
-		y = i >> 0x8
-		x = i & 0xFF
-		col = ui.hsv_to_rgb(0.6,f64(x)/256.,f64(y)/256.)
-		// 
-		if true  {println("$i -> ($x, $y) -> $col")}
-		cb.buf << col.r
-		cb.buf << col.g
-		cb.buf << col.b
-		// cb.buf << 128
-	}
-	// println("end update")
-}
-
 fn draw_sv(mut c ui.CanvasLayout, app voidptr) {
 	mut cb := component_colorbox(c)
-	img := c.ui.gg.create_image_from_byte_array(cb.buf)
-	c.ui.gg.draw_image(c.x + c.offset_x, c.y + c.offset_y, c.width, c.height, &img)
+	ctx := c.ui.gg
+	w, h := 256, 256
+	u0 := f32((c.x + c.offset_x) / w)
+	v0 := f32((c.y + c.offset_y) / h)
+	u1 := f32((c.x + c.offset_x + c.width) / w)
+	v1 := f32((c.y + c.offset_y + c.height) / h)
+	x0 := f32((c.x + c.offset_x) * ctx.scale)
+	y0 := f32((c.y + c.offset_y) * ctx.scale)
+	x1 := f32((c.x + c.offset_x + c.width) * ctx.scale)
+	y1 := f32((c.y + c.offset_y + c.height) * ctx.scale)
+	sgl.load_pipeline(ctx.timage_pip)
+	sgl.enable_texture()
+	sgl.texture(cb.simg)
+	sgl.begin_quads()
+	sgl.c4b(255, 255, 255, 255)
+	sgl.v2f_t2f(x0, y0, u0, v0)
+	sgl.v2f_t2f(x1, y0, u1, v0)
+	sgl.v2f_t2f(x1, y1, u1, v1)
+	sgl.v2f_t2f(x0, y1, u0, v1)
+	sgl.end()
+	sgl.disable_texture()
 }
 
-/*
-fn create_texture(w int, h int, buf &u8) C.sg_image {
-	sz := w * h * 4
+pub fn (mut cb ColorBox) update_buffer() {
+	sz := 256 * 256 * 4
+	buf := unsafe { malloc(sz) }
+	mut col := gx.Color{}
+	mut i := 0
+	for y in 0 .. 256 {
+	for x in 0 .. 256 {
+			unsafe { 
+				col = ui.hsv_to_rgb(0.3,f64(x)/256.,1. -f64(y)/256.)
+				buf[i] = col.r
+				buf[i+1] = col.g
+				buf[i+2] = col.b
+				buf[i+3] = col.a
+				i += 4
+			}
+		}
+	}
+	unsafe {
+		update_text_texture(cb.simg, 256, 256, buf)
+		free(buf)
+	}
+}
+
+fn create_texture(w int, h int) C.sg_image {
 	mut img_desc := C.sg_image_desc{
 		width: w
 		height: h
 		num_mipmaps: 0
 		min_filter: .linear
 		mag_filter: .linear
-		// usage: .dynamic
+		usage: .dynamic
 		wrap_u: .clamp_to_edge
 		wrap_v: .clamp_to_edge
 		label: &byte(0)
 		d3d11_texture: 0
-	}
-	// commen if .dynamic is enabled
-	img_desc.data.subimage[0][0] = C.sg_range{
-		ptr: buf
-		size: size_t(sz)
 	}
 
 	sg_img := C.sg_make_image(&img_desc)
@@ -131,5 +149,3 @@ fn update_text_texture(sg_img C.sg_image, w int, h int, buf &byte) {
 	}
 	C.sg_update_image(sg_img, &tmp_sbc)
 }
-
-*/
