@@ -10,3 +10,7 @@ pub fn component_doublelistbox(w ui.ComponentChild) &DoubleListBox {
 pub fn component_toolbar(w ui.ComponentChild) &ToolBar {
 	return &ToolBar(w.component)
 }
+
+pub fn component_colorbox(w ui.ComponentChild) &ColorBox {
+	return &ColorBox(w.component)
+}
