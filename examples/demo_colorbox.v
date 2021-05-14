@@ -23,12 +23,9 @@ fn main() {
 		mode: .resizable
 		native_message: false
 	}, [
-		ui.column({
-			margin_: .05
-			spacing: .05
-		}, [
+		ui.column({}, [
 			uic.colorbox(
-				id: "cbox"
+				id: 'cbox'
 			),
 		]),
 	])
