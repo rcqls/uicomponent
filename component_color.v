@@ -2,13 +2,14 @@ module uicomponent
 
 import ui
 import gx
-import sokol.sgl
 
-const (
-	cb_sp      = 5
-	cb_hsv_col = 30
-	cb_nc      = 2
-	cb_nr      = 3
+pub const (
+	cb_sp       = 3
+	cb_hsv_col  = 30
+	cb_nc       = 2
+	cb_nr       = 3
+	cb_cv_hsv_w = (cb_hsv_col + cb_sp) * cb_nc + cb_sp
+	cb_cv_hsv_h = (cb_hsv_col + cb_sp) * cb_nr + cb_sp
 )
 
 struct HSVColor {
@@ -21,24 +22,35 @@ struct HSVColor {
 struct ColorBox {
 mut:
 	simg    C.sg_image
-	h       f64 = 0.5
-	s       f64 = 0.5
-	v       f64 = 0.5
+	h       f64 = 0.
+	s       f64 = 0.75
+	v       f64 = 0.75
 	rgb     gx.Color
 	ind_sel int
 	hsv_sel []HSVColor = []HSVColor{len: uicomponent.cb_nc * uicomponent.cb_nr}
+	light   bool
+	txt_r   string
+	txt_g   string
+	txt_b   string
 pub mut:
 	layout     &ui.Stack // optional
 	cv_h       &ui.CanvasLayout
 	cv_sv      &ui.CanvasLayout
 	r_rgb_cur  &ui.Rectangle
 	cv_hsv_sel &ui.CanvasLayout
+	tb_r       &ui.TextBox
+	tb_g       &ui.TextBox
+	tb_b       &ui.TextBox
+	lb_r       &ui.Label
+	lb_g       &ui.Label
+	lb_b       &ui.Label
 	// To become a component of a parent component
 	component voidptr
 }
 
 pub struct ColorBoxConfig {
-	id string
+	id    string
+	light bool
 }
 
 pub fn colorbox(c ColorBoxConfig) &ui.Stack {
@@ -50,15 +62,11 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		on_mouse_move: cv_h_mouse_move
 	)
 	mut cv_sv := ui.canvas_plus(
-		width: 256
-		height: 256
 		on_draw: cv_sv_draw
 		on_mouse_move: cv_sv_mouse_move
 		on_click: cv_sv_click
 	)
 	mut r_rgb_cur := ui.rectangle(
-		width: 30
-		height: 30
 		radius: 5
 	)
 	mut cv_hsv_sel := ui.canvas_plus(
@@ -67,9 +75,14 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		on_draw: cv_sel_draw
 		on_click: cv_sel_click
 	)
+	mut tb_r := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
+	mut tb_g := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
+	mut tb_b := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
+	lb_r := ui.label(text: 'R:')
+	lb_g := ui.label(text: 'G:')
+	lb_b := ui.label(text: 'B:')
 	mut layout := ui.row({
 		id: c.id
-		bg_color: gx.rgba(0, 0, 0, 200)
 		widths: [30., 256., ui.compact]
 		heights: [256., 256., ui.compact]
 		spacing: 10.
@@ -78,16 +91,15 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		cv_h,
 		cv_sv,
 		ui.column({
-			heights: [30.,
-				(uicomponent.cb_hsv_col + uicomponent.cb_sp) * uicomponent.cb_nr +
-				uicomponent.cb_sp,
+			heights: [f64(uicomponent.cb_cv_hsv_h), uicomponent.cb_cv_hsv_w, ui.compact, ui.compact,
+				ui.compact,
 			]
-			widths: [30.,
-				(uicomponent.cb_hsv_col + uicomponent.cb_sp) * uicomponent.cb_nc +
-				uicomponent.cb_sp,
-			]
+			widths: f64(uicomponent.cb_cv_hsv_w)
 			spacing: 5.
-		}, [r_rgb_cur, cv_hsv_sel]),
+		}, [cv_hsv_sel, r_rgb_cur, ui.row({ widths: [20., ui.stretch] }, [lb_r, tb_r]),
+			ui.row({ widths: [20., ui.stretch] }, [lb_g, tb_g]),
+			ui.row({ widths: [20., ui.stretch] }, [lb_b, tb_b]),
+		]),
 	])
 	mut cb := &ColorBox{
 		layout: layout
@@ -95,15 +107,22 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		cv_sv: cv_sv
 		r_rgb_cur: r_rgb_cur
 		cv_hsv_sel: cv_hsv_sel
+		tb_r: tb_r
+		tb_g: tb_g
+		tb_b: tb_b
+		lb_r: lb_r
+		lb_g: lb_g
+		lb_b: lb_b
+		light: c.light
 	}
-	cb.cv_h.component = cb
-	cb.cv_sv.component = cb
-	cb.r_rgb_cur.component = cb
-	cb.cv_hsv_sel.component = cb
-	layout.component = cb
+
+	ui.component_link(cb, layout, cv_h, cv_sv, r_rgb_cur, cv_hsv_sel, tb_r, tb_g, tb_b)
+
+	tb_r.text = &cb.txt_r
+	tb_g.text = &cb.txt_g
+	tb_b.text = &cb.txt_b
 	// init component
 	layout.component_init = colorbox_init
-	// cb.update_buffer()
 	return layout
 }
 
@@ -111,11 +130,13 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 // automatically called in by the layout
 fn colorbox_init(layout &ui.Stack) {
 	mut cb := component_colorbox(layout)
-	cb.update_cur_color()
+	cb.update_cur_color(true)
+	// init all hsv colors
 	for i in 0 .. (uicomponent.cb_nc * uicomponent.cb_nr) {
 		cb.hsv_sel[i] = HSVColor{f64(i) / (uicomponent.cb_nc * uicomponent.cb_nr), .75, .75}
 	}
-	cb.simg = create_dynamic_texture(256, 256)
+	cb.update_theme()
+	cb.simg = ui.create_dynamic_texture(256, 256)
 	cb.update_buffer()
 }
 
@@ -140,48 +161,35 @@ fn cv_h_draw(c &ui.CanvasLayout, app voidptr) {
 	}
 	c.draw_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, ui.hsv_to_rgb(cb.h, .2, .7))
 	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, ui.hsv_to_rgb(cb.h, 1., 1.))
-	c.draw_empty_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, gx.white)
+	c.draw_empty_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, if cb.light {
+		gx.black
+	} else {
+		gx.white
+	})
 }
 
 fn cv_sv_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
-	cb.s = f64(e.x) / 256.
-	cb.v = 1. - f64(e.y) / 256.
+	cb.s = f64(e.x) / 255.
+	cb.v = 1. - f64(e.y) / 255.
+	cb.update_cur_color(true)
 	cb.update_sel_color()
 }
 
 fn cv_sv_mouse_move(e ui.MouseMoveEvent, c &ui.CanvasLayout) {
 	if c.ui.btn_down[0] {
 		mut cb := component_colorbox(c)
-		cb.s = f64(e.x) / 256.
-		cb.v = 1. - f64(e.y) / 256.
-		cb.update_cur_color()
+		cb.s = f64(e.x) / 255.
+		cb.v = 1. - f64(e.y) / 255.
+		cb.update_cur_color(true)
 	}
 }
 
 fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 	mut cb := component_colorbox(c)
-	ctx := c.ui.gg
-	w, h := 256, 256
-	u0 := f32((c.x + c.offset_x) / w)
-	v0 := f32((c.y + c.offset_y) / h)
-	u1 := f32((c.x + c.offset_x + c.width) / w)
-	v1 := f32((c.y + c.offset_y + c.height) / h)
-	x0 := f32((c.x + c.offset_x) * ctx.scale)
-	y0 := f32((c.y + c.offset_y) * ctx.scale)
-	x1 := f32((c.x + c.offset_x + c.width) * ctx.scale)
-	y1 := f32((c.y + c.offset_y + c.height) * ctx.scale)
-	sgl.load_pipeline(ctx.timage_pip)
-	sgl.enable_texture()
-	sgl.texture(cb.simg)
-	sgl.begin_quads()
-	sgl.c4b(255, 255, 255, 255)
-	sgl.v2f_t2f(x0, y0, u0, v0)
-	sgl.v2f_t2f(x1, y0, u1, v0)
-	sgl.v2f_t2f(x1, y1, u1, v1)
-	sgl.v2f_t2f(x0, y1, u0, v1)
-	sgl.end()
-	sgl.disable_texture()
+
+	c.draw_texture(256, 256, cb.simg)
+
 	c.draw_rounded_rect(int(cb.s * 256.) - 10, int((1. - cb.v) * 256.) - 10, 20, 20, 10,
 		ui.hsv_to_rgb(cb.h, 1 - cb.s, 1. - cb.v))
 	c.draw_rounded_rect(int(cb.s * 256.) - 7, int((1. - cb.v) * 256.) - 7, 14, 14, 7,
@@ -197,6 +205,7 @@ fn cv_sel_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 	hsv := cb.hsv_sel[cb.ind_sel]
 	cb.h, cb.s, cb.v = hsv.h, hsv.s, hsv.v
 	cb.update_buffer()
+	cb.update_cur_color(true)
 }
 
 fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
@@ -219,8 +228,13 @@ fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
 	}
 }
 
-fn (mut cb ColorBox) update_cur_color() {
+fn (mut cb ColorBox) update_cur_color(reactive bool) {
 	cb.r_rgb_cur.color = ui.hsv_to_rgb(cb.h, cb.s, cb.v)
+	if reactive {
+		cb.txt_r = cb.r_rgb_cur.color.r.str()
+		cb.txt_g = cb.r_rgb_cur.color.g.str()
+		cb.txt_b = cb.r_rgb_cur.color.b.str()
+	}
 }
 
 fn (mut cb ColorBox) update_sel_color() {
@@ -229,7 +243,7 @@ fn (mut cb ColorBox) update_sel_color() {
 }
 
 pub fn (mut cb ColorBox) update_buffer() {
-	unsafe { destroy_texture(cb.simg) }
+	unsafe { ui.destroy_texture(cb.simg) }
 	sz := 256 * 256 * 4
 	buf := unsafe { malloc(sz) }
 	mut col := gx.Color{}
@@ -237,7 +251,7 @@ pub fn (mut cb ColorBox) update_buffer() {
 	for y in 0 .. 256 {
 		for x in 0 .. 256 {
 			unsafe {
-				col = ui.hsv_to_rgb(cb.h, f64(x) / 256., 1. - f64(y) / 256.)
+				col = ui.hsv_to_rgb(cb.h, f64(x) / 255., 1. - f64(y) / 255.)
 				buf[i] = col.r
 				buf[i + 1] = col.g
 				buf[i + 2] = col.b
@@ -247,64 +261,38 @@ pub fn (mut cb ColorBox) update_buffer() {
 		}
 	}
 	unsafe {
-		cb.simg = create_texture(256, 256, buf)
+		cb.simg = ui.create_texture(256, 256, buf)
 		// update_text_texture(cb.simg, 256, 256, buf)
 		free(buf)
 	}
 }
 
-fn create_dynamic_texture(w int, h int) C.sg_image {
-	mut img_desc := C.sg_image_desc{
-		width: w
-		height: h
-		num_mipmaps: 0
-		min_filter: .linear
-		mag_filter: .linear
-		usage: .dynamic
-		wrap_u: .clamp_to_edge
-		wrap_v: .clamp_to_edge
-		label: &byte(0)
-		d3d11_texture: 0
+pub fn (mut cb ColorBox) update_theme() {
+	cb.layout.bg_color = if cb.light { gx.rgba(255, 255, 255, 200) } else { gx.rgba(0, 0, 0, 200) }
+	lbl_cfg := gx.TextCfg{
+		color: if cb.light { gx.black } else { gx.white }
 	}
-
-	sg_img := C.sg_make_image(&img_desc)
-	return sg_img
+	cb.lb_r.text_cfg = lbl_cfg
+	cb.lb_g.text_cfg = lbl_cfg
+	cb.lb_b.text_cfg = lbl_cfg
 }
 
-fn create_texture(w int, h int, buf &byte) C.sg_image {
-	mut img_desc := C.sg_image_desc{
-		width: w
-		height: h
-		num_mipmaps: 0
-		min_filter: .linear
-		mag_filter: .linear
-		wrap_u: .clamp_to_edge
-		wrap_v: .clamp_to_edge
-		label: &byte(0)
-		d3d11_texture: 0
+fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
+	mut cb := component_colorbox(tb)
+	tbr := cb.tb_r
+	r := cb.txt_r.int()
+	if 0 <= r && r < 256 {
+		g := cb.txt_g.int()
+		if 0 <= g && g < 256 {
+			b := cb.txt_b.int()
+			if 0 <= b && b < 256 {
+				h, s, v := ui.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
+				// println("hsv: ${r}, $g, $b ->  $h, $s, $v")
+				cb.h, cb.s, cb.v = h, s, v
+				cb.update_buffer()
+				cb.update_cur_color(false)
+				// cb.update_sel_color()
+			}
+		}
 	}
-	sz := w * h * 4
-
-	img_desc.data.subimage[0][0] = C.sg_range{
-		ptr: buf
-		size: size_t(sz)
-	}
-
-	sg_img := C.sg_make_image(&img_desc)
-	return sg_img
-}
-
-fn destroy_texture(sg_img C.sg_image) {
-	C.sg_destroy_image(sg_img)
-}
-
-// Use only if usage: .dynamic is enabled
-fn update_text_texture(sg_img C.sg_image, w int, h int, buf &byte) {
-	sz := w * h * 4
-	mut tmp_sbc := C.sg_image_data{}
-	tmp_sbc.subimage[0][0] = C.sg_range{
-		ptr: buf
-		size: size_t(sz)
-	}
-	C.sg_update_image(sg_img, &tmp_sbc)
 }

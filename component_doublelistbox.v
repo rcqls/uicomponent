@@ -53,14 +53,8 @@ pub fn doublelistbox(c DoubleListBoxConfig) &ui.Stack {
 		btn_right: btn_right
 		btn_clear: btn_clear
 	}
-	// attach to one component all the components
-	lb_left.component = dbl_lb
-	lb_right.component = dbl_lb
-	btn_left.component = dbl_lb
-	btn_right.component = dbl_lb
-	btn_clear.component = dbl_lb
-
-	layout.component = dbl_lb
+	// link to one component all the components
+	ui.component_link(dbl_lb, layout, lb_left, lb_right, btn_left, btn_right, btn_clear)
 
 	layout.component_type = 'DoubleListBox'
 	// This needs to be added to the children tree

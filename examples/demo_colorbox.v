@@ -2,8 +2,8 @@ import ui
 import uicomponent as uic
 
 const (
-	win_width  = 600
-	win_height = 400
+	win_width  = 30 + 256 + 4 * 10 + uic.cb_cv_hsv_w
+	win_height = 276
 )
 
 struct App {
@@ -20,13 +20,11 @@ fn main() {
 		height: win_height
 		title: 'V UI: Toolbar'
 		state: app
-		mode: .resizable
+		// mode: .resizable
 		native_message: false
 	}, [
 		ui.column({}, [
-			uic.colorbox(
-				id: 'cbox'
-			),
+			uic.colorbox(id: 'cbox', light: true),
 		]),
 	])
 	app.window = window
