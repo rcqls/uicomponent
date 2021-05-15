@@ -26,6 +26,7 @@ mut:
 	s       f64 = 0.75
 	v       f64 = 0.75
 	rgb     gx.Color
+	linked  &gx.Color = &gx.Color(0)
 	ind_sel int
 	hsv_sel []HSVColor = []HSVColor{len: uicomponent.cb_nc * uicomponent.cb_nr}
 	light   bool
@@ -116,7 +117,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		light: c.light
 	}
 
-	ui.component_link(cb, layout, cv_h, cv_sv, r_rgb_cur, cv_hsv_sel, tb_r, tb_g, tb_b)
+	ui.component_connect(cb, layout, cv_h, cv_sv, r_rgb_cur, cv_hsv_sel, tb_r, tb_g, tb_b)
 
 	tb_r.text = &cb.txt_r
 	tb_g.text = &cb.txt_g
@@ -139,6 +140,10 @@ fn colorbox_init(layout &ui.Stack) {
 	cb.simg = ui.create_dynamic_texture(256, 256)
 	cb.update_buffer()
 }
+
+pub fn (mut cb ColorBox) connect(col &gx.Color) {
+	cb.linked = unsafe {col }
+} 
 
 fn cv_h_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
@@ -230,6 +235,9 @@ fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
 
 fn (mut cb ColorBox) update_cur_color(reactive bool) {
 	cb.r_rgb_cur.color = ui.hsv_to_rgb(cb.h, cb.s, cb.v)
+	if cb.linked != 0 {
+		unsafe {*cb.linked = cb.r_rgb_cur.color}
+	}
 	if reactive {
 		cb.txt_r = cb.r_rgb_cur.color.r.str()
 		cb.txt_g = cb.r_rgb_cur.color.g.str()
@@ -279,7 +287,6 @@ pub fn (mut cb ColorBox) update_theme() {
 
 fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 	mut cb := component_colorbox(tb)
-	tbr := cb.tb_r
 	r := cb.txt_r.int()
 	if 0 <= r && r < 256 {
 		g := cb.txt_g.int()
