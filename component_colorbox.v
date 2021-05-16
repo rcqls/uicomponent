@@ -176,7 +176,7 @@ fn cv_h_draw(c &ui.CanvasLayout, app voidptr) {
 		c.draw_rect(0, j, 30, 1, cb.hsv_to_rgb(f64(j) / 256., .75, .75))
 	}
 	c.draw_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, cb.hsv_to_rgb(cb.h, .2, .7))
-	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, cb.hsv_to_rgb(cb.h, 1., 1.))
+	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, cb.hsv_to_rgb(cb.h, .75, .75))
 	c.draw_empty_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, if cb.light {
 		gx.black
 	} else {
@@ -214,17 +214,14 @@ fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 
 fn cv_sel_key_down(e ui.KeyEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
-	if e.mods == .super {
+	if e.key in [.up,.down] {
 		cb.hsl = !cb.hsl
 		cb.update_hsl()
 		cb.update_buffer()
-		r := cb.txt_r.int()
-		g := cb.txt_g.int()
-		b := cb.txt_b.int()
-		cb.h, cb.s, cb.v = cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
+		cb.update_from_tb()
 		cb.update_cur_color(true)
 	}
-	if e.mods == .shift {
+	if e.key in [.left,.right] {
 		cb.light = !cb.light
 		cb.update_theme()
 	}
@@ -343,4 +340,11 @@ fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 			}
 		}
 	}
+}
+
+fn (mut cb ColorBox) update_from_tb() {
+	r := cb.txt_r.int()
+	g := cb.txt_g.int()
+	b := cb.txt_b.int()
+	cb.h, cb.s, cb.v = cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
 }
