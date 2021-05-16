@@ -12,6 +12,10 @@ pub const (
 	cb_cv_hsv_h = (cb_hsv_col + cb_sp) * cb_nr + cb_sp
 )
 
+type RgbToHsv = fn (col gx.Color) (f64, f64, f64)
+
+type HsvToRgb = fn (f64, f64, f64) gx.Color
+
 struct HSVColor {
 	h f64
 	s f64
@@ -21,18 +25,21 @@ struct HSVColor {
 [heap]
 struct ColorBox {
 mut:
-	simg    C.sg_image
-	h       f64 = 0.
-	s       f64 = 0.75
-	v       f64 = 0.75
-	rgb     gx.Color
-	linked  &gx.Color = &gx.Color(0)
-	ind_sel int
-	hsv_sel []HSVColor = []HSVColor{len: uicomponent.cb_nc * uicomponent.cb_nr}
-	light   bool
-	txt_r   string
-	txt_g   string
-	txt_b   string
+	simg       C.sg_image
+	h          f64 = 0.
+	s          f64 = 0.75
+	v          f64 = 0.75
+	rgb        gx.Color
+	linked     &gx.Color = &gx.Color(0)
+	ind_sel    int
+	hsv_sel    []HSVColor = []HSVColor{len: uicomponent.cb_nc * uicomponent.cb_nr}
+	light      bool
+	txt_r      string
+	txt_g      string
+	txt_b      string
+	rgb_to_hsv RgbToHsv = ui.rgb_to_hsv
+	hsv_to_rgb HsvToRgb = ui.hsv_to_rgb
+	hsl        bool
 pub mut:
 	layout     &ui.Stack // optional
 	cv_h       &ui.CanvasLayout
@@ -52,6 +59,7 @@ pub mut:
 pub struct ColorBoxConfig {
 	id    string
 	light bool
+	hsl   bool
 }
 
 pub fn colorbox(c ColorBoxConfig) &ui.Stack {
@@ -75,6 +83,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		bg_color: gx.rgb(220, 220, 220)
 		on_draw: cv_sel_draw
 		on_click: cv_sel_click
+		on_key_down: cv_sel_key_down
 	)
 	mut tb_r := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
 	mut tb_g := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
@@ -115,6 +124,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		lb_g: lb_g
 		lb_b: lb_b
 		light: c.light
+		hsl: c.hsl // use hsl instead of hsv
 	}
 
 	ui.component_connect(cb, layout, cv_h, cv_sv, r_rgb_cur, cv_hsv_sel, tb_r, tb_g, tb_b)
@@ -131,6 +141,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 // automatically called in by the layout
 fn colorbox_init(layout &ui.Stack) {
 	mut cb := component_colorbox(layout)
+	cb.update_hsl()
 	cb.update_cur_color(true)
 	// init all hsv colors
 	for i in 0 .. (uicomponent.cb_nc * uicomponent.cb_nr) {
@@ -142,8 +153,8 @@ fn colorbox_init(layout &ui.Stack) {
 }
 
 pub fn (mut cb ColorBox) connect(col &gx.Color) {
-	cb.linked = unsafe {col }
-} 
+	cb.linked = unsafe { col }
+}
 
 fn cv_h_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
@@ -162,10 +173,10 @@ fn cv_h_mouse_move(e ui.MouseMoveEvent, c &ui.CanvasLayout) {
 fn cv_h_draw(c &ui.CanvasLayout, app voidptr) {
 	cb := component_colorbox(c)
 	for j in 0 .. 255 {
-		c.draw_rect(0, j, 30, 1, ui.hsv_to_rgb(f64(j) / 256., 1., 1.))
+		c.draw_rect(0, j, 30, 1, cb.hsv_to_rgb(f64(j) / 256., .75, .75))
 	}
-	c.draw_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, ui.hsv_to_rgb(cb.h, .2, .7))
-	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, ui.hsv_to_rgb(cb.h, 1., 1.))
+	c.draw_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, cb.hsv_to_rgb(cb.h, .2, .7))
+	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, cb.hsv_to_rgb(cb.h, 1., 1.))
 	c.draw_empty_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, if cb.light {
 		gx.black
 	} else {
@@ -196,9 +207,27 @@ fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 	c.draw_texture(256, 256, cb.simg)
 
 	c.draw_rounded_rect(int(cb.s * 256.) - 10, int((1. - cb.v) * 256.) - 10, 20, 20, 10,
-		ui.hsv_to_rgb(cb.h, 1 - cb.s, 1. - cb.v))
+		cb.hsv_to_rgb(cb.h, 1 - cb.s, 1. - cb.v))
 	c.draw_rounded_rect(int(cb.s * 256.) - 7, int((1. - cb.v) * 256.) - 7, 14, 14, 7,
-		ui.hsv_to_rgb(cb.h, cb.s, cb.v))
+		cb.hsv_to_rgb(cb.h, cb.s, cb.v))
+}
+
+fn cv_sel_key_down(e ui.KeyEvent, c &ui.CanvasLayout) {
+	mut cb := component_colorbox(c)
+	if e.mods == .super {
+		cb.hsl = !cb.hsl
+		cb.update_hsl()
+		cb.update_buffer()
+		r := cb.txt_r.int()
+		g := cb.txt_g.int()
+		b := cb.txt_b.int()
+		cb.h, cb.s, cb.v = cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
+		cb.update_cur_color(true)
+	}
+	if e.mods == .shift {
+		cb.light = !cb.light
+		cb.update_theme()
+	}
 }
 
 fn cv_sel_click(e ui.MouseEvent, c &ui.CanvasLayout) {
@@ -227,16 +256,18 @@ fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
 			h, s, v = hsv.h, hsv.s, hsv.v
 			c.draw_rounded_rect(uicomponent.cb_sp + i * (uicomponent.cb_hsv_col + uicomponent.cb_sp),
 				uicomponent.cb_sp + j * (uicomponent.cb_hsv_col + uicomponent.cb_sp),
-				uicomponent.cb_hsv_col, uicomponent.cb_hsv_col, .25, ui.hsv_to_rgb(h,
+				uicomponent.cb_hsv_col, uicomponent.cb_hsv_col, .25, cb.hsv_to_rgb(h,
 				s, v))
 		}
 	}
 }
 
 fn (mut cb ColorBox) update_cur_color(reactive bool) {
-	cb.r_rgb_cur.color = ui.hsv_to_rgb(cb.h, cb.s, cb.v)
+	cb.r_rgb_cur.color = cb.hsv_to_rgb(cb.h, cb.s, cb.v)
 	if cb.linked != 0 {
-		unsafe {*cb.linked = cb.r_rgb_cur.color}
+		unsafe {
+			*cb.linked = cb.r_rgb_cur.color
+		}
 	}
 	if reactive {
 		cb.txt_r = cb.r_rgb_cur.color.r.str()
@@ -246,7 +277,7 @@ fn (mut cb ColorBox) update_cur_color(reactive bool) {
 }
 
 fn (mut cb ColorBox) update_sel_color() {
-	// cb.r_sel.color = ui.hsv_to_rgb(cb.h, cb.s, cb.v)
+	// cb.r_sel.color = cb.hsv_to_rgb(cb.h, cb.s, cb.v)
 	cb.hsv_sel[cb.ind_sel] = HSVColor{cb.h, cb.s, cb.v}
 }
 
@@ -259,7 +290,7 @@ pub fn (mut cb ColorBox) update_buffer() {
 	for y in 0 .. 256 {
 		for x in 0 .. 256 {
 			unsafe {
-				col = ui.hsv_to_rgb(cb.h, f64(x) / 255., 1. - f64(y) / 255.)
+				col = cb.hsv_to_rgb(cb.h, f64(x) / 255., 1. - f64(y) / 255.)
 				buf[i] = col.r
 				buf[i + 1] = col.g
 				buf[i + 2] = col.b
@@ -285,6 +316,16 @@ pub fn (mut cb ColorBox) update_theme() {
 	cb.lb_b.text_cfg = lbl_cfg
 }
 
+pub fn (mut cb ColorBox) update_hsl() {
+	if cb.hsl {
+		cb.rgb_to_hsv = ui.rgb_to_hsl
+		cb.hsv_to_rgb = ui.hsl_to_rgb
+	} else {
+		cb.rgb_to_hsv = ui.rgb_to_hsv
+		cb.hsv_to_rgb = ui.hsv_to_rgb
+	}
+}
+
 fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 	mut cb := component_colorbox(tb)
 	r := cb.txt_r.int()
@@ -293,7 +334,7 @@ fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 		if 0 <= g && g < 256 {
 			b := cb.txt_b.int()
 			if 0 <= b && b < 256 {
-				h, s, v := ui.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
+				h, s, v := cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
 				// println("hsv: ${r}, $g, $b ->  $h, $s, $v")
 				cb.h, cb.s, cb.v = h, s, v
 				cb.update_buffer()

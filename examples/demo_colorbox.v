@@ -16,15 +16,15 @@ fn main() {
 	mut app := &App{
 		window: 0
 	}
-	cb_layout := uic.colorbox(id: 'cbox', light: false)
-	rect := ui.rectangle({
-		text: "Here a simple ui rectangle "
-		text_cfg :gx.TextCfg{
+	cb_layout := uic.colorbox(id: 'cbox', light: false, hsl: false)
+	rect := ui.rectangle(
+		text: 'Here a simple ui rectangle '
+		text_cfg: gx.TextCfg{
 			color: gx.blue
 			align: gx.align_left
 			size: 30
 		}
-	})
+	)
 	window := ui.window({
 		width: win_width
 		height: win_height
@@ -33,10 +33,8 @@ fn main() {
 		native_message: false
 	}, [
 		ui.column({
-			heights: [275., ui.stretch] 
-		}, [
-			cb_layout, rect
-		]),
+			heights: [275., ui.stretch]
+		}, [cb_layout, rect]),
 	])
 	mut cb := uic.component_colorbox(cb_layout)
 	cb.connect(&rect.color)
