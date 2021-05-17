@@ -33,13 +33,15 @@ mut:
 	linked     &gx.Color = &gx.Color(0)
 	ind_sel    int
 	hsv_sel    []HSVColor = []HSVColor{len: uicomponent.cb_nc * uicomponent.cb_nr}
-	light      bool
 	txt_r      string
 	txt_g      string
 	txt_b      string
 	rgb_to_hsv RgbToHsv = ui.rgb_to_hsv
 	hsv_to_rgb HsvToRgb = ui.hsv_to_rgb
-	hsl        bool
+	// options
+	light bool // light theme
+	hsl   bool // use hsl instead of hsv
+	drag  bool // drag mode for canvas on h
 pub mut:
 	layout     &ui.Stack // optional
 	cv_h       &ui.CanvasLayout
@@ -60,6 +62,7 @@ pub struct ColorBoxConfig {
 	id    string
 	light bool
 	hsl   bool
+	drag  bool
 }
 
 pub fn colorbox(c ColorBoxConfig) &ui.Stack {
@@ -68,7 +71,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		height: 256
 		on_draw: cv_h_draw
 		on_click: cv_h_click
-		on_mouse_move: cv_h_mouse_move
+		// on_mouse_move: cv_h_mouse_move
 	)
 	mut cv_sv := ui.canvas_plus(
 		on_draw: cv_sv_draw
@@ -124,7 +127,8 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		lb_g: lb_g
 		lb_b: lb_b
 		light: c.light
-		hsl: c.hsl // use hsl instead of hsv
+		hsl: c.hsl
+		drag: c.drag
 	}
 
 	ui.component_connect(cb, layout, cv_h, cv_sv, r_rgb_cur, cv_hsv_sel, tb_r, tb_g, tb_b)
@@ -214,16 +218,18 @@ fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 
 fn cv_sel_key_down(e ui.KeyEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
-	if e.key in [.up,.down] {
+	if e.key in [.up, .down] {
 		cb.hsl = !cb.hsl
 		cb.update_hsl()
 		cb.update_buffer()
 		cb.update_from_tb()
 		cb.update_cur_color(true)
-	}
-	if e.key in [.left,.right] {
+	} else if e.key == .right {
 		cb.light = !cb.light
 		cb.update_theme()
+	} else if e.key == .left {
+		cb.drag = !cb.drag
+		cb.update_drag_mode()
 	}
 }
 
@@ -303,26 +309,6 @@ pub fn (mut cb ColorBox) update_buffer() {
 	}
 }
 
-pub fn (mut cb ColorBox) update_theme() {
-	cb.layout.bg_color = if cb.light { gx.rgba(255, 255, 255, 200) } else { gx.rgba(0, 0, 0, 200) }
-	lbl_cfg := gx.TextCfg{
-		color: if cb.light { gx.black } else { gx.white }
-	}
-	cb.lb_r.text_cfg = lbl_cfg
-	cb.lb_g.text_cfg = lbl_cfg
-	cb.lb_b.text_cfg = lbl_cfg
-}
-
-pub fn (mut cb ColorBox) update_hsl() {
-	if cb.hsl {
-		cb.rgb_to_hsv = ui.rgb_to_hsl
-		cb.hsv_to_rgb = ui.hsl_to_rgb
-	} else {
-		cb.rgb_to_hsv = ui.rgb_to_hsv
-		cb.hsv_to_rgb = ui.hsv_to_rgb
-	}
-}
-
 fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 	mut cb := component_colorbox(tb)
 	r := cb.txt_r.int()
@@ -347,4 +333,34 @@ fn (mut cb ColorBox) update_from_tb() {
 	g := cb.txt_g.int()
 	b := cb.txt_b.int()
 	cb.h, cb.s, cb.v = cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
+}
+
+// options
+
+pub fn (mut cb ColorBox) update_theme() {
+	cb.layout.bg_color = if cb.light { gx.rgba(255, 255, 255, 200) } else { gx.rgba(0, 0, 0, 200) }
+	lbl_cfg := gx.TextCfg{
+		color: if cb.light { gx.black } else { gx.white }
+	}
+	cb.lb_r.text_cfg = lbl_cfg
+	cb.lb_g.text_cfg = lbl_cfg
+	cb.lb_b.text_cfg = lbl_cfg
+}
+
+pub fn (mut cb ColorBox) update_hsl() {
+	if cb.hsl {
+		cb.rgb_to_hsv = ui.rgb_to_hsl
+		cb.hsv_to_rgb = ui.hsl_to_rgb
+	} else {
+		cb.rgb_to_hsv = ui.rgb_to_hsv
+		cb.hsv_to_rgb = ui.hsv_to_rgb
+	}
+}
+
+pub fn (mut cb ColorBox) update_drag_mode() {
+	if cb.drag {
+		cb.cv_h.mouse_move_fn = cv_h_mouse_move
+	} else {
+		cb.cv_h.mouse_move_fn = voidptr(0)
+	}
 }
