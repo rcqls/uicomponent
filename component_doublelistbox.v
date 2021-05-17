@@ -5,7 +5,7 @@ import ui
 [heap]
 struct DoubleListBox {
 pub mut:
-	layout    &ui.Stack // optional
+	layout    &ui.Stack // required
 	lb_left   &ui.ListBox
 	lb_right  &ui.ListBox
 	btn_left  &ui.Button

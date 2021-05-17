@@ -5,7 +5,7 @@ import ui
 [heap]
 struct ToolBar {
 pub mut:
-	layout &ui.Stack // optional
+	layout &ui.Stack // required
 	items  []ui.Widget
 	// To become a component of a parent component
 	component voidptr

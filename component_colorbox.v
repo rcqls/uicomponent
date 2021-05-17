@@ -43,7 +43,7 @@ mut:
 	hsl   bool // use hsl instead of hsv
 	drag  bool // drag mode for canvas on h
 pub mut:
-	layout     &ui.Stack // optional
+	layout     &ui.Stack // required
 	cv_h       &ui.CanvasLayout
 	cv_sv      &ui.CanvasLayout
 	r_rgb_cur  &ui.Rectangle
