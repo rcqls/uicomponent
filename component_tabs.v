@@ -3,6 +3,12 @@ module uicomponent
 import ui
 import gx
 
+enum Mode {
+	vertical
+	horizontal
+	accordion
+}
+
 [heap]
 struct Tabs {
 pub mut:
@@ -11,14 +17,14 @@ pub mut:
 	active  string
 	tab_bar &ui.Stack
 	pages   map[string]ui.Widget
-	mode    int
+	mode    Mode
 	// To become a component of a parent component
 	component voidptr
 }
 
 pub struct TabsConfig {
 	id     string
-	mode   int // default Vertical
+	mode   Mode = .vertical
 	active int
 	tabs   []string
 	pages  []ui.Widget
@@ -31,12 +37,14 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 		children << ui.canvas_layout({
 			id: tab_id(c.id, i)
 			on_click: tab_click
+			on_key_down: tab_key_down
 		}, [
-			ui.at(0, 0, ui.rectangle(text: tab, border: true, width: 50, height: 30)),
+			ui.at(0, 0, ui.label(text: tab)),
 		])
 	}
 	// Layout
 	mut tab_bar := ui.row({
+		id: '${c.id}_tabbar'
 		widths: 50.
 		heights: 30.
 		spacing: 3
@@ -52,8 +60,8 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 
 	mut layout := ui.column({
 		id: c.id
-		widths: ui.stretch
-		heights: [30., ui.stretch]
+		widths: [ui.compact, ui.stretch]
+		heights: [ui.compact, ui.stretch]
 	}, [
 		tab_bar,
 		m_pages[tab_active],
@@ -86,7 +94,7 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 }
 
 fn tabs_init(layout &ui.Stack) {
-	tabs := component_tabs(layout)
+	mut tabs := component_tabs(layout)
 	for id, mut page in tabs.pages {
 		println('tab $id initialized')
 		page.init(layout)
@@ -96,6 +104,14 @@ fn tabs_init(layout &ui.Stack) {
 	// for mut tab in tabs.tab_bar.children {
 	// 	tab.width =
 	// }
+	tabs.layout.update_layout()
+}
+
+fn tab_key_down(e ui.KeyEvent, c &ui.CanvasLayout) {
+	if e.key in [.up, .down] {
+		mut tabs := component_tabs(c)
+		tabs.transpose()
+	}
 }
 
 fn tab_click(e ui.MouseEvent, c &ui.CanvasLayout) {
@@ -121,5 +137,19 @@ fn (tabs &Tabs) update_tab_colors() {
 			// println("$tab.id == $tabs.active -> $color")
 			tab.bg_color = color
 		}
+	}
+}
+
+fn (mut tabs Tabs) transpose() {
+	if tabs.mode in [.vertical, .horizontal] {
+		if tabs.mode == .vertical {
+			tabs.mode = .horizontal
+		} else {
+			tabs.mode = .vertical
+		}
+		tabs.tab_bar.transpose(false)
+		tabs.tab_bar.update_layout()
+		tabs.layout.transpose(false)
+		tabs.layout.update_layout()
 	}
 }

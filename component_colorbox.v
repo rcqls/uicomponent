@@ -74,6 +74,8 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		// on_mouse_move: cv_h_mouse_move
 	)
 	mut cv_sv := ui.canvas_plus(
+		width: 256
+		height: 256
 		on_draw: cv_sv_draw
 		on_mouse_move: cv_sv_mouse_move
 		on_click: cv_sv_click
@@ -96,6 +98,8 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 	lb_b := ui.label(text: 'B:')
 	mut layout := ui.row({
 		id: c.id
+		width: 30 + 256 + 4 * 10 + uicomponent.cb_cv_hsv_w
+		height: 256 + 2 * 10
 		widths: [30., 256., ui.compact]
 		heights: [256., 256., ui.compact]
 		spacing: 10.

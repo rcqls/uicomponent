@@ -32,19 +32,28 @@ fn main() {
 				id: 'tab'
 				tabs: ['tab1', 'tab2', 'tab3']
 				pages: [
-					ui.column({ heights: ui.compact, widths: ui.compact, bg_color: gx.rgb(200,
-					100, 200) }, [
+					ui.column({
+					heights: ui.compact
+					widths: ui.compact
+					bg_color: gx.rgb(200, 100, 200)
+				}, [
 					ui.button(id: 'left1', text: 'toto', padding: .1, radius: .25),
 					ui.button(id: 'left2', text: 'toto2'),
 				]),
-					ui.column({ heights: ui.stretch, widths: ui.stretch, bg_color: gx.rgb(100,
-						200, 200) }, [
+					ui.column({
+						heights: ui.compact
+						widths: ui.compact
+						bg_color: gx.rgb(100, 200, 200)
+					}, [
 						// ui.button(id: 'left3', text: 'toto3', padding: .1, radius: .25),
 						// ui.button(id: 'left4', text: 'toto4')
 						uic.colorbox(id: 'cbox', light: false, hsl: false),
 					]),
-					ui.column({ heights: ui.stretch, widths: ui.stretch, bg_color: gx.rgb(100,
-						200, 200) }, [
+					ui.column({
+						heights: 200.
+						widths: 300.
+						bg_color: gx.rgb(100, 200, 200)
+					}, [
 						uic.doublelistbox(id: 'dlb1', title: 'dlb1', items: ['totto', 'titi']),
 					]),
 				]

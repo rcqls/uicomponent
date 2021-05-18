@@ -74,7 +74,6 @@ fn doublelistbox_move_left(a voidptr, btn &ui.Button) {
 	mut dlb := component_doublelistbox(btn)
 	if dlb.lb_right.is_selected() {
 		_, item := dlb.lb_right.selected() or { '', '' }
-		println('move << $item')
 		if !(item in dlb.lb_left.values()) {
 			dlb.lb_left.add_item(item, item)
 			dlb.lb_right.remove_item(item)

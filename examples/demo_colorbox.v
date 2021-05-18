@@ -33,7 +33,7 @@ fn main() {
 		native_message: false
 	}, [
 		ui.column({
-			heights: [275., ui.stretch]
+			heights: [ui.compact, ui.compact]
 		}, [cb_layout, rect]),
 	])
 	mut cb := uic.component_colorbox(cb_layout)
