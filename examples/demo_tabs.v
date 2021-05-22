@@ -16,6 +16,15 @@ fn main() {
 	mut app := &App{
 		window: 0
 	}
+	cb_layout := uic.colorbox(id: 'cbox', light: false, hsl: false)
+	rect := ui.rectangle(
+		text: 'Here a simple ui rectangle '
+		text_cfg: gx.TextCfg{
+			color: gx.blue
+			align: gx.align_left
+			size: 30
+		}
+	)
 	window := ui.window({
 		width: win_width
 		height: win_height
@@ -43,12 +52,7 @@ fn main() {
 					ui.column({
 						heights: ui.compact
 						widths: ui.compact
-						bg_color: gx.rgb(100, 200, 200)
-					}, [
-						// ui.button(id: 'left3', text: 'toto3', padding: .1, radius: .25),
-						// ui.button(id: 'left4', text: 'toto4')
-						uic.colorbox(id: 'cbox', light: false, hsl: false),
-					]),
+					}, [cb_layout, rect]),
 					ui.column({
 						heights: 200.
 						widths: 300.
@@ -60,6 +64,8 @@ fn main() {
 			),
 		]),
 	])
+	mut cb := uic.component_colorbox(cb_layout)
+	cb.connect(&rect.color)
 	app.window = window
 	ui.run(window)
 }
