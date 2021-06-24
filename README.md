@@ -6,7 +6,6 @@
 * `double_listbox()`
 * `toolbar()`
 
-
 ## Comments
 
 A composable widget is a concept that provides the call of some connected widgets in the same manner as a regular widget, that is, by calling a sort of constructor function: `ui.button(...)` for a widget `uic.tabs(...)` (where `uic` is the alias of the imported module `uicomponent`) for a composable widget.

@@ -18,3 +18,7 @@ pub fn component_colorbox(w ui.ComponentChild) &ColorBox {
 pub fn component_tabs(w ui.ComponentChild) &Tabs {
 	return &Tabs(w.component)
 }
+
+pub fn component_view(w ui.ComponentChild) &View {
+	return &View(w.component)
+}
