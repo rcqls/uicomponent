@@ -65,6 +65,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 }
 
 fn view_init(c &ui.CanvasLayout) {
+	println("($c.x, $c.y)")
 	mut v := component_view(c)
 	v.update_texts()
 }
@@ -78,9 +79,9 @@ fn view_draw(c &ui.CanvasLayout, state voidptr) {
 		txt1.bmp.align = t.align
 		txt1.bmp.color = u32(t.color.rgba8())
 		txt1.destroy_texture()
-		v.create_text_block(i, 500, 500, t.fontsize)
+		v.create_text_block(i)
 		txt1.create_texture()
-		txt1.draw_text_bmp(c.ui.gg, c.x+10, c.y+10)
+		txt1.draw_text_bmp(c.ui.gg, c.x, c.y)
 	}
 }
 
@@ -97,7 +98,12 @@ fn (mut v View) load_fonts(fps map[string]string) {
 }
 
 fn (mut v View) bitmap_init() {
-	for t in v.texts {
+	// TODO: ensure that a font exits
+	mut fontname := v.tf.keys()[0]
+	for mut t in v.texts {
+		if t.fontname == "" {
+			t.fontname = fontname
+		}
 		v.ttf_render << &ttf.TTF_render_Sokol {
 			bmp: &ttf.BitMap{
 				tf: &(v.tf[t.fontname])
@@ -136,7 +142,7 @@ mut:
 	x_end		int
 	y_end 		int
 	// style
-	fontname 	string = "imprima"
+	fontname 	string
 	fontsize 	int	= 22
 	align		ttf.Text_align = .left
 	justify		bool
@@ -165,11 +171,11 @@ fn (mut v View) update_text_block(i int) {
 	// 
 	println("text = $text")
 	
-	// unsafe{
-	// 	text_block.text.free()
-	// 	text_block.x.free()
-	// 	text_block.y.free()
-	// }
+	unsafe{
+		text_block.text.free()
+		text_block.x.free()
+		text_block.y.free()
+	}
 
 	// for i, _ in text_block.text {
 	// 	text_block.text.delete_last()
@@ -186,6 +192,7 @@ fn (mut v View) update_text_block(i int) {
 	space_cw = int(space_cw * bmp.scale)
 
 	old_space_cw := bmp.space_cw
+	mut end_x, mut end_y := 0, 0
 
 	mut x := 0
 	mut y := 0
@@ -216,13 +223,11 @@ fn (mut v View) update_text_block(i int) {
 			new_x << x + left_offset
 			new_y << y + y_base
 			new_text << txt
+			end_x, _ = bmp.get_bbox(txt)
+			end_x += x + left_offset
 			println("$new_x, $new_y, $new_text")
-			// bmp.draw_text(txt)
-			//---- DEBUG ----
-			// mut txt_w , _ := bmp.draw_text(txt)
-			// bmp.box(x + left_offset,y+y_base - int((bmp.tf.y_min)*bmp.scale), x + txt_w + left_offset, y + y_base - int((bmp.tf.y_max) * bmp.scale), u32(0x00ff_ffee) )
-			//---------------
 			y += y_base
+			end_y = y
 		} else {
 			// println("to cut: ${txt}")
 			mut txt1 := txt.split(' ')
@@ -252,15 +257,11 @@ fn (mut v View) update_text_block(i int) {
 					new_x << x + left_offset
 					new_y << y + y_base
 					new_text << tmp_str
+					end_x, _ = bmp.get_bbox(txt)
+					end_x += x + left_offset
 					println("22: $new_x, $new_y, $new_text")
-					// bmp.set_pos(x + left_offset, y + y_base)
-					// bmp.draw_text(tmp_str)
-					//---- DEBUG ----
-					// txt_w , _ := bmp.draw_text(tmp_str)
-					// println("printing [${x},${y}] => '${tmp_str}' space_cw: $bmp.space_cw")
-					// bmp.box(x + left_offset,y + y_base - int((bmp.tf.y_min)*bmp.scale), x + txt_w + left_offset, y + y_base - int((bmp.tf.y_max) * bmp.scale), u32(0x0000_00ff) )
-					//---------------
 					y += y_base
+					end_y = y
 					txt1 = txt1[c..]
 					c = txt1.len
 					//---- DEBUG ----
@@ -279,7 +280,7 @@ fn (mut v View) update_text_block(i int) {
 	text_block.x = new_x
 	text_block.y = new_y
 	text_block.x_end = 0
-	text_block.y_end = 0
+	text_block.y_end = end_y
 }
 
 fn (mut v View) draw_text(i int) {
@@ -311,7 +312,7 @@ pub fn (mut v View) draw_text_block(i int, block DrawTextBlockConfig) {
 	println('y_base: $y_base (($bmp.tf.y_max - $bmp.tf.y_min) * $bmp.scale)')
 
 	bmp.box(x, y, x + block.w, y + block.h, u32(0xFF00_00EE))
-
+	println("($x, $y, ${x + block.w}, ${y + block.h})")
 	// spaces data
 	mut space_cw, _ := bmp.tf.get_horizontal_metrics(u16(` `))
 	space_cw = int(space_cw * bmp.scale)
@@ -392,21 +393,8 @@ pub fn (mut v View) draw_text_block(i int, block DrawTextBlockConfig) {
 	bmp.space_cw = old_space_cw
 }
 
-pub fn (mut v View) create_text_block(i int, in_w int, in_h int, in_font_size f32) {
+pub fn (mut v View) create_text_block(i int) {
 	mut tf_skl := &(v.ttf_render[i])
-	// scale_reduct := tf_skl.scale_reduct
-	// device_dpi := tf_skl.device_dpi
-	// font_size := in_font_size //* scale_reduct
-	// // Formula: (font_size * device dpi) / (72dpi * em_unit)
-	// // scale := ((1.0  * devide_dpi )/ f32(72 * tf_skl.bmp.tf.units_per_em))* font_size
-	// scale := f32(font_size * device_dpi) / f32(72 * tf_skl.bmp.tf.units_per_em)
-	// // println("Scale: $scale")
-
-	// tf_skl.bmp.scale = scale * scale_reduct
-	// w := in_w
-	// h := in_h
-	// tf_skl.bmp.width = int(w * scale_reduct + 0.5)
-	// tf_skl.bmp.height = int((h + 2) * scale_reduct + 0.5)
 
 	sz := tf_skl.bmp.width * tf_skl.bmp.height * tf_skl.bmp.bp
 
