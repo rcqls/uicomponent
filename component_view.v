@@ -87,7 +87,7 @@ fn view_draw(c &ui.CanvasLayout, state voidptr) {
 }
 
 fn view_full_size(c &ui.CanvasLayout) (int, int) {
-	println("ici")
+	// println("ici")
 	return 500, 500
 }
 

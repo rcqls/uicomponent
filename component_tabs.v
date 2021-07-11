@@ -66,8 +66,8 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 
 	mut layout := ui.column({
 		id: c.id
-		widths: [c.tab_width, ui.stretch]
-		heights: [c.tab_height, ui.stretch]
+		widths: [ui.compact, ui.stretch]
+		heights: [ui.compact, ui.stretch]
 	}, [
 		tab_bar,
 		m_pages[tab_active],
