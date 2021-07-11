@@ -18,6 +18,9 @@ pub mut:
 	tab_bar &ui.Stack
 	pages   map[string]ui.Widget
 	mode    Mode
+	tab_width 	f64
+	tab_height 	f64
+	tab_spacing f64
 	// To become a component of a parent component
 	component voidptr
 }
@@ -28,6 +31,9 @@ pub struct TabsConfig {
 	active int
 	tabs   []string
 	pages  []ui.Widget
+	tab_width 	f64 = 50.
+	tab_height 	f64 = 30.
+	tab_spacing f64 = 5. 
 }
 
 pub fn tabs(c TabsConfig) &ui.Stack {
@@ -45,9 +51,9 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 	// Layout
 	mut tab_bar := ui.row({
 		id: '${c.id}_tabbar'
-		widths: 50.
-		heights: 30.
-		spacing: 3
+		widths: c.tab_width
+		heights: c.tab_height
+		spacing: c.tab_spacing
 	}, children)
 
 	mut m_pages := map[string]ui.Widget{}
@@ -60,8 +66,8 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 
 	mut layout := ui.column({
 		id: c.id
-		widths: [ui.compact, ui.stretch]
-		heights: [30., ui.stretch]
+		widths: [c.tab_width, ui.stretch]
+		heights: [c.tab_height, ui.stretch]
 	}, [
 		tab_bar,
 		m_pages[tab_active],
@@ -74,6 +80,9 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 		tab_bar: tab_bar
 		pages: m_pages
 		mode: c.mode
+		tab_width: c.tab_width
+		tab_height: c.tab_height
+		tab_spacing: c.tab_spacing
 	}
 
 	for i, mut page in c.pages {
@@ -149,7 +158,7 @@ fn (mut tabs Tabs) transpose() {
 		}
 		tabs.tab_bar.transpose(false)
 		tabs.tab_bar.update_layout()
-		tabs.layout.transpose(true)
+		tabs.layout.transpose(false)
 		tabs.layout.update_layout()
 	}
 }
