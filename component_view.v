@@ -27,8 +27,8 @@ pub struct ViewConfig {
 	scrollview 		bool
 	width         	int
 	height        	int
-	full_width    	int
-	full_height   	int
+	full_width    	int = -1
+	full_height   	int = -1
 	z_index       	int
 	texts		  	[]TextBlock
 	cut_lines		bool = true
@@ -45,6 +45,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 		full_width: c.full_width
 		full_height: c.full_height
 		z_index: c.z_index
+		full_size_fn: view_full_size
 	})
 	mut view := &View{
 		layout: layout
@@ -65,7 +66,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 }
 
 fn view_init(c &ui.CanvasLayout) {
-	println("($c.x, $c.y)")
+	println("view init ($c.x, $c.y)")
 	mut v := component_view(c)
 	v.update_texts()
 }
@@ -85,14 +86,19 @@ fn view_draw(c &ui.CanvasLayout, state voidptr) {
 	}
 }
 
+fn view_full_size(c &ui.CanvasLayout) (int, int) {
+	println("ici")
+	return 500, 500
+}
+
 fn (mut v View) load_fonts(fps map[string]string) {
 	// load TTF fonts
 	for k, fp in fps {
 		mut tf := ttf.TTF_File{}
 		tf.buf = os.read_bytes(fp) or { panic(err) }
-		println("TrueTypeFont file [$fp] len: ${tf.buf.len}")
+		// println("TrueTypeFont file [$fp] len: ${tf.buf.len}")
 		tf.init()
-		println("Unit per EM: $tf.units_per_em")
+		// println("Unit per EM: $tf.units_per_em")
 		v.tf[k] = tf
 	}
 }
@@ -141,6 +147,7 @@ mut:
 	max_width 	int
 	x_end		int
 	y_end 		int
+	beside 		bool
 	// style
 	fontname 	string
 	fontsize 	int	= 22
@@ -155,10 +162,10 @@ fn (mut tb TextBlock) join() string {
 
 fn (mut v View) update_texts() {
 	for i, _ in v.texts {
-		println("i=$i")
+		// println("i=$i")
 		v.update_text_block(i)
 	}
-	println("texts: ${v.texts}")
+	// println("texts: ${v.texts}")
 }
 
 fn (mut v View) update_text_block(i int) {
@@ -168,8 +175,7 @@ fn (mut v View) update_text_block(i int) {
 
 	mut text_block := &(v.texts[i])
 	text := text_block.join()
-	// 
-	println("text = $text")
+	// println("text = $text")
 	
 	unsafe{
 		text_block.text.free()
@@ -186,7 +192,7 @@ fn (mut v View) update_text_block(i int) {
 	mut new_y 	 := []int{}
 
 	mut y_base := int((bmp.tf.y_max - bmp.tf.y_min) * bmp.scale)
-	println('y_base: $y_base (($bmp.tf.y_max - $bmp.tf.y_min) * $bmp.scale)')
+	// println('y_base: $y_base (($bmp.tf.y_max - $bmp.tf.y_min) * $bmp.scale)')
 	// spaces data
 	mut space_cw, _ := bmp.tf.get_horizontal_metrics(u16(` `))
 	space_cw = int(space_cw * bmp.scale)
@@ -211,11 +217,11 @@ fn (mut v View) update_text_block(i int) {
 	for txt in text.split_into_lines() {
 		bmp.space_cw = old_space_cw
 		mut w, _ := bmp.get_bbox(txt)
-		println("${bmp.get_bbox(txt)} $txt")
+		// println("${bmp.get_bbox(txt)} $txt")
 		if w <= v.text_width || v.cut_lines == false {
 			// println("Solid block!")
 			left_offset := int((v.text_width - w) * offset_flag)
-			println("left_offset: $left_offset = ($v.text_width - $w) * $offset_flag)")
+			// println("left_offset: $left_offset = ($v.text_width - $w) * $offset_flag)")
 			if bmp.justify && (f32(w) / f32(v.text_width)) >= bmp.justify_fill_ratio {
 				bmp.space_cw = old_space_cw + get_justify_space_cw(txt, w, v.text_width, space_cw)
 			}
@@ -225,7 +231,7 @@ fn (mut v View) update_text_block(i int) {
 			new_text << txt
 			end_x, _ = bmp.get_bbox(txt)
 			end_x += x + left_offset
-			println("$new_x, $new_y, $new_text")
+			// println("$new_x, $new_y, $new_text")
 			y += y_base
 			end_y = y
 		} else {
@@ -259,7 +265,7 @@ fn (mut v View) update_text_block(i int) {
 					new_text << tmp_str
 					end_x, _ = bmp.get_bbox(txt)
 					end_x += x + left_offset
-					println("22: $new_x, $new_y, $new_text")
+					// println("22: $new_x, $new_y, $new_text")
 					y += y_base
 					end_y = y
 					txt1 = txt1[c..]
@@ -287,13 +293,60 @@ fn (mut v View) draw_text(i int) {
 	mut bmp := v.ttf_render[i].bmp
 	text_block := v.texts[i]
 	for k, txt in text_block.text {
-		// println("k=$k (${text_block.x[k]}, ${text_block.y[k]}): $txt")
 		bmp.set_pos(text_block.x[k], text_block.y[k])
+		// if k % 2 == 0 {
+		// 	bmp.color = u32(gx.red.rgba8())
+		// } else {
+		// 	bmp.color = u32(gx.yellow.rgba8())
+		// }
+		// println("k=$k $bmp.color (${text_block.x[k]}, ${text_block.y[k]}): $txt")
 		bmp.draw_text(txt)
 	}
 }
 
+pub fn (mut v View) create_text_block(i int) {
+	mut tf_skl := &(v.ttf_render[i])
 
+	sz := tf_skl.bmp.width * tf_skl.bmp.height * tf_skl.bmp.bp
+
+	// if true { return }
+
+	// RAM buffer
+	if sz > tf_skl.bmp.buf_size {
+		if sz > 0 {
+			unsafe { free(tf_skl.bmp.buf) }
+		}
+		// println('Alloc: $sz bytes')
+		tf_skl.bmp.buf = unsafe { malloc_noscan(sz) }
+		tf_skl.bmp.buf_size = sz
+	}
+
+	tf_skl.bmp.init_filler()
+
+	// draw the text
+	mut y_base := int((tf_skl.bmp.tf.y_max - tf_skl.bmp.tf.y_min) * tf_skl.bmp.scale)
+	tf_skl.bmp.set_pos(0, y_base)
+	tf_skl.bmp.clear()
+
+	v.draw_text(i)
+	// v.draw_text_block(i, x: 0, y: 0, w: v.text_width, h: v.text_height)
+	tf_skl.format_texture()
+}
+
+fn get_justify_space_cw(txt string, w int, block_w int, space_cw int) f32 {
+	num_spaces := txt.count(' ')
+	if num_spaces < 1 {
+		return 0
+	}
+	delta := block_w - w
+	// println("num spc: $num_spaces")
+	// println("delta: ${txt} w:$w bw:$block_w space_cw:$space_cw")
+	res := f32(delta) / f32(num_spaces) / f32(space_cw)
+	// println("res: $res")
+	return res
+}
+
+/*
 pub struct DrawTextBlockConfig {
 	x         int  // x postion of the left high corner
 	y         int  // y postion of the left high corner
@@ -301,7 +354,6 @@ pub struct DrawTextBlockConfig {
 	h         int
 	cut_lines bool = true
 }
-
 
 pub fn (mut v View) draw_text_block(i int, block DrawTextBlockConfig) {
 	mut bmp := v.ttf_render[i].bmp
@@ -392,46 +444,4 @@ pub fn (mut v View) draw_text_block(i int, block DrawTextBlockConfig) {
 
 	bmp.space_cw = old_space_cw
 }
-
-pub fn (mut v View) create_text_block(i int) {
-	mut tf_skl := &(v.ttf_render[i])
-
-	sz := tf_skl.bmp.width * tf_skl.bmp.height * tf_skl.bmp.bp
-
-	// if true { return }
-
-	// RAM buffer
-	if sz > tf_skl.bmp.buf_size {
-		if sz > 0 {
-			unsafe { free(tf_skl.bmp.buf) }
-		}
-		// println('Alloc: $sz bytes')
-		tf_skl.bmp.buf = unsafe { malloc_noscan(sz) }
-		tf_skl.bmp.buf_size = sz
-	}
-
-	tf_skl.bmp.init_filler()
-
-	// draw the text
-	mut y_base := int((tf_skl.bmp.tf.y_max - tf_skl.bmp.tf.y_min) * tf_skl.bmp.scale)
-	tf_skl.bmp.set_pos(0, y_base)
-	tf_skl.bmp.clear()
-
-	v.draw_text(i)
-	// v.draw_text_block(i, x: 0, y: 0, w: v.text_width, h: v.text_height)
-	tf_skl.format_texture()
-}
-
-fn get_justify_space_cw(txt string, w int, block_w int, space_cw int) f32 {
-	num_spaces := txt.count(' ')
-	if num_spaces < 1 {
-		return 0
-	}
-	delta := block_w - w
-	// println("num spc: $num_spaces")
-	// println("delta: ${txt} w:$w bw:$block_w space_cw:$space_cw")
-	res := f32(delta) / f32(num_spaces) / f32(space_cw)
-	// println("res: $res")
-	return res
-}
-
+*/

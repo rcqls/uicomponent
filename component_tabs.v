@@ -61,7 +61,7 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 	mut layout := ui.column({
 		id: c.id
 		widths: [ui.compact, ui.stretch]
-		heights: [ui.compact, ui.stretch]
+		heights: [30., ui.stretch]
 	}, [
 		tab_bar,
 		m_pages[tab_active],
@@ -149,7 +149,7 @@ fn (mut tabs Tabs) transpose() {
 		}
 		tabs.tab_bar.transpose(false)
 		tabs.tab_bar.update_layout()
-		tabs.layout.transpose(false)
+		tabs.layout.transpose(true)
 		tabs.layout.update_layout()
 	}
 }

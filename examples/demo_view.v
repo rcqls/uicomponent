@@ -30,10 +30,6 @@ fn main() {
 			// ui.rectangle({color: gx.white})
 			uic.view(
 				id: "view"
-				// width: 300
-				// height: 300
-				full_width: 500
-				full_height: 500 
 				color: gx.white
 				font_paths: map{
 					'imprima': "assets/Imprima-Regular.ttf"
@@ -47,7 +43,7 @@ Tommorow I'm not so sure :(
 But Vwill prevail for sure, V is the way!!
 "]
 						color: gx.blue
-						fontsize: 32
+						fontsize: 14
 					}
 					{
 						text: ["Todayyy it is a good day!
