@@ -15,24 +15,24 @@ fn main() {
 	mut app := &App{
 		window: 0
 	}
-	window := ui.window({
+	window := ui.window(
 		width: win_width
 		height: win_height
 		title: 'V UI: Composable Widget'
 		state: app
 		mode: .resizable
 		native_message: false
-	}, [
-		ui.column({
+		children:  [
+		ui.column(
 			margin_: .05
 			spacing: .05
 			heights: [8 * ui.stretch, ui.stretch, ui.stretch]
-		}, [
-			ui.row({
+			children:  [
+			ui.row(
 			spacing: .1
 			margin_: 5
 			widths: ui.stretch
-		}, [
+			children:  [
 			uic.doublelistbox(id: 'dlb1', title: 'dlb1', items: ['totto', 'titi']),
 			uic.doublelistbox(id: 'dlb2', title: 'dlb2', items: ['tottoooo', 'titi', 'tototta']),
 		]),

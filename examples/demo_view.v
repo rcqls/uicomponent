@@ -16,17 +16,17 @@ fn main() {
 	mut app := &App{
 		window: 0
 	}
-	window := ui.window({
+	window := ui.window(
 		width: win_width
 		height: win_height
 		title: 'V UI: View'
 		state: app
 		mode: .resizable
 		native_message: false
-	}, [
-		ui.row({
+		children:  [
+		ui.row(
 			widths: ui.stretch
-		}, [
+			children:  [
 			// ui.rectangle({color: gx.white})
 			uic.view(
 				id: "view"
@@ -37,7 +37,7 @@ fn main() {
 				}
 				scrollview: true
 				texts: [
-					{
+					uic.TextBlock{
 						text: ["Today it is a good day!
 Tommorow I'm not so sure :(
 But Vwill prevail for sure, V is the way!!
@@ -45,7 +45,7 @@ But Vwill prevail for sure, V is the way!!
 						color: gx.blue
 						fontsize: 14
 					}
-					{
+					uic.TextBlock{
 						text: ["Todayyy it is a good day!
 Tommorow I'm not so sure :("]
 						color: gx.red
@@ -66,7 +66,7 @@ Tommorow I'm not so sure :("]
 				}
 				scrollview: true
 				texts: [
-					{
+					uic.TextBlock{
 						text: ["Today it is a good day!
 Tommorow I'm not so sure :(
 But Vwill prevail for sure, V is the way!!
@@ -74,7 +74,7 @@ But Vwill prevail for sure, V is the way!!
 						color: gx.blue
 						fontsize: 32
 					}
-					{
+					uic.TextBlock{
 						text: ["Todayyy it is a good day!
 Tommorow I'm not so sure :("]
 						color: gx.red

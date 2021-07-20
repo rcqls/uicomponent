@@ -40,21 +40,21 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 	mut children := []ui.Widget{}
 
 	for i, tab in c.tabs {
-		children << ui.canvas_layout({
+		children << ui.canvas_layout(
 			id: tab_id(c.id, i)
 			on_click: tab_click
 			on_key_down: tab_key_down
-		}, [
+			children: [
 			ui.at(0, 0, ui.label(text: tab)),
 		])
 	}
 	// Layout
-	mut tab_bar := ui.row({
+	mut tab_bar := ui.row(
 		id: '${c.id}_tabbar'
 		widths: c.tab_width
 		heights: c.tab_height
 		spacing: c.tab_spacing
-	}, children)
+		children: children)
 
 	mut m_pages := map[string]ui.Widget{}
 	for i, page in c.pages {
@@ -64,11 +64,11 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 	tab_active := tab_id(c.id, c.active)
 	println('active: $tab_active')
 
-	mut layout := ui.column({
+	mut layout := ui.column(
 		id: c.id
 		widths: [ui.compact, ui.stretch]
 		heights: [ui.compact, ui.stretch]
-	}, [
+		children: [
 		tab_bar,
 		m_pages[tab_active],
 	])

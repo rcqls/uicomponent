@@ -27,20 +27,22 @@ pub fn doublelistbox(c DoubleListBoxConfig) &ui.Stack {
 	for item in c.items {
 		items[item] = item
 	}
-	mut lb_left := ui.listbox({ width: 50 }, items)
-	mut lb_right := ui.listbox({ width: 50 }, map[string]string{})
+	mut lb_left := ui.listbox(width: 50, items: items)
+	mut lb_right := ui.listbox(width: 50, items: map[string]string{})
 	mut btn_right := ui.button(text: '>>', onclick: doublelistbox_move_right)
 	mut btn_left := ui.button(text: '<<', onclick: doublelistbox_move_left)
 	mut btn_clear := ui.button(text: 'clear', onclick: doublelistbox_clear)
-	mut layout := ui.row({
+	mut layout := ui.row(
 		title: c.title
 		id: c.id
 		widths: [4 * ui.stretch, 2 * ui.stretch, 4 * ui.stretch]
 		heights: ui.stretch
 		spacing: .05
-	}, [
+	children: [
 		lb_left,
-		ui.column({ widths: ui.stretch, heights: ui.compact, spacing: 10 }, [btn_right, btn_left,
+		ui.column(
+			widths: ui.stretch, heights: ui.compact, spacing: 10 
+			children: [btn_right, btn_left,
 			btn_clear,
 		]),
 		lb_right,

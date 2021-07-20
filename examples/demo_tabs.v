@@ -25,39 +25,39 @@ fn main() {
 			size: 30
 		}
 	)
-	window := ui.window({
+	window := ui.window(
 		width: win_width
 		height: win_height
 		title: 'V UI: Toolbar'
 		state: app
 		mode: .resizable
 		native_message: false
-	}, [
-		ui.column({
+		children:  [
+		ui.column(
 			margin_: .05
 			spacing: .05
-		}, [
+			children:  [
 			uic.tabs(
 				id: 'tab'
 				tabs: ['tab1', 'tab2', 'tab3']
 				pages: [
-					ui.column({
+					ui.column(
 						heights: ui.compact
 						widths: ui.compact
 						bg_color: gx.rgb(200, 100, 200)
-					}, [
+						children:  [
 						ui.button(id: 'left1', text: 'toto', padding: .1, radius: .25),
 						ui.button(id: 'left2', text: 'toto2'),
 					]),
-					ui.column({
+					ui.column(
 						heights: ui.compact
 						widths: ui.compact
-					}, [cb_layout, rect]),
-					ui.column({
+						children:  [cb_layout, rect]),
+					ui.column(
 						heights: 200.
 						widths: 300.
 						bg_color: gx.rgb(100, 200, 200)
-					}, [
+						children:  [
 						uic.doublelistbox(id: 'dlb1', title: 'dlb1', items: ['totto', 'titi']),
 					]),
 				]

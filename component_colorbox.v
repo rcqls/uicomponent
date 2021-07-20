@@ -96,7 +96,7 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 	lb_r := ui.label(text: 'R:')
 	lb_g := ui.label(text: 'G:')
 	lb_b := ui.label(text: 'B:')
-	mut layout := ui.row({
+	mut layout := ui.row(
 		id: c.id
 		width: 30 + 256 + 4 * 10 + uicomponent.cb_cv_hsv_w
 		height: 256 + 2 * 10
@@ -104,18 +104,25 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		heights: [256., 256., ui.compact]
 		spacing: 10.
 		margin_: 10
-	}, [
+	children: [
 		cv_h,
 		cv_sv,
-		ui.column({
+		ui.column(
 			heights: [f64(uicomponent.cb_cv_hsv_h), uicomponent.cb_cv_hsv_w, ui.compact, ui.compact,
 				ui.compact,
 			]
 			widths: f64(uicomponent.cb_cv_hsv_w)
 			spacing: 5.
-		}, [cv_hsv_sel, r_rgb_cur, ui.row({ widths: [20., ui.stretch] }, [lb_r, tb_r]),
-			ui.row({ widths: [20., ui.stretch] }, [lb_g, tb_g]),
-			ui.row({ widths: [20., ui.stretch] }, [lb_b, tb_b]),
+		children: [cv_hsv_sel, r_rgb_cur, 
+			ui.row(
+			widths: [20., ui.stretch] 
+			children: [lb_r, tb_r]),
+			ui.row(
+				widths: [20., ui.stretch]
+				children: [lb_g, tb_g]),
+			ui.row(
+				widths: [20., ui.stretch] 
+				children: [lb_b, tb_b]),
 		]),
 	])
 	mut cb := &ColorBox{

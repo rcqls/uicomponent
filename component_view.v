@@ -35,7 +35,7 @@ pub struct ViewConfig {
 }
 
 pub fn view(c ViewConfig) &ui.CanvasLayout {
-	mut layout := ui.canvas_plus({
+	mut layout := ui.canvas_plus(
 		id: c.id
 		bg_color: c.color
 		on_draw: view_draw
@@ -46,7 +46,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 		full_height: c.full_height
 		z_index: c.z_index
 		full_size_fn: view_full_size
-	})
+	)
 	mut view := &View{
 		layout: layout
 		texts: c.texts

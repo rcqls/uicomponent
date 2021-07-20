@@ -15,18 +15,18 @@ fn main() {
 	mut app := &App{
 		window: 0
 	}
-	window := ui.window({
+	window := ui.window(
 		width: win_width
 		height: win_height
 		title: 'V UI: Toolbar'
 		state: app
 		mode: .resizable
 		native_message: false
-	}, [
-		ui.column({
+		children:  [
+		ui.column(
 			margin_: .05
 			spacing: .05
-		}, [
+			children:  [
 			uic.toolbar(
 				widths: [.1, .1, 2 * ui.stretch, .1, ui.stretch, .1]
 				heights: .1

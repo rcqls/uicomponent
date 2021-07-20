@@ -25,16 +25,16 @@ fn main() {
 			size: 30
 		}
 	)
-	window := ui.window({
+	window := ui.window(
 		width: win_width
 		height: win_height
 		title: 'V UI: Toolbar'
 		state: app
 		native_message: false
-	}, [
-		ui.column({
+	children: [
+		ui.column(
 			heights: [ui.compact, ui.compact]
-		}, [cb_layout, rect]),
+		children: [cb_layout, rect]),
 	])
 	mut cb := uic.component_colorbox(cb_layout)
 	cb.connect(&rect.color)
