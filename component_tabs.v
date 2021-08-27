@@ -12,28 +12,28 @@ enum Mode {
 [heap]
 struct Tabs {
 pub mut:
-	id      string
-	layout  &ui.Stack // required
-	active  string
-	tab_bar &ui.Stack
-	pages   map[string]ui.Widget
-	mode    Mode
-	tab_width 	f64
-	tab_height 	f64
+	id          string
+	layout      &ui.Stack // required
+	active      string
+	tab_bar     &ui.Stack
+	pages       map[string]ui.Widget
+	mode        Mode
+	tab_width   f64
+	tab_height  f64
 	tab_spacing f64
 	// To become a component of a parent component
 	component voidptr
 }
 
 pub struct TabsConfig {
-	id     string
-	mode   Mode = .vertical
-	active int
-	tabs   []string
-	pages  []ui.Widget
-	tab_width 	f64 = 50.
-	tab_height 	f64 = 30.
-	tab_spacing f64 = 5. 
+	id          string
+	mode        Mode = .vertical
+	active      int
+	tabs        []string
+	pages       []ui.Widget
+	tab_width   f64 = 50.0
+	tab_height  f64 = 30.0
+	tab_spacing f64 = 5.0
 }
 
 pub fn tabs(c TabsConfig) &ui.Stack {
@@ -45,8 +45,9 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 			on_click: tab_click
 			on_key_down: tab_key_down
 			children: [
-			ui.at(0, 0, ui.label(text: tab)),
-		])
+				ui.at(0, 0, ui.label(text: tab)),
+			]
+		)
 	}
 	// Layout
 	mut tab_bar := ui.row(
@@ -54,7 +55,8 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 		widths: c.tab_width
 		heights: c.tab_height
 		spacing: c.tab_spacing
-		children: children)
+		children: children
+	)
 
 	mut m_pages := map[string]ui.Widget{}
 	for i, page in c.pages {
@@ -69,9 +71,10 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 		widths: [ui.compact, ui.stretch]
 		heights: [ui.compact, ui.stretch]
 		children: [
-		tab_bar,
-		m_pages[tab_active],
-	])
+			tab_bar,
+			m_pages[tab_active],
+		]
+	)
 
 	mut tabs := &Tabs{
 		id: c.id

@@ -26,7 +26,7 @@ struct HSVColor {
 struct ColorBox {
 mut:
 	simg       C.sg_image
-	h          f64 = 0.
+	h          f64 = 0.0
 	s          f64 = 0.75
 	v          f64 = 0.75
 	rgb        gx.Color
@@ -100,31 +100,35 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		id: c.id
 		width: 30 + 256 + 4 * 10 + uicomponent.cb_cv_hsv_w
 		height: 256 + 2 * 10
-		widths: [30., 256., ui.compact]
-		heights: [256., 256., ui.compact]
-		spacing: 10.
+		widths: [30.0, 256.0, ui.compact]
+		heights: [256.0, 256.0, ui.compact]
+		spacing: 10.0
 		margin_: 10
-	children: [
-		cv_h,
-		cv_sv,
-		ui.column(
-			heights: [f64(uicomponent.cb_cv_hsv_h), uicomponent.cb_cv_hsv_w, ui.compact, ui.compact,
-				ui.compact,
-			]
-			widths: f64(uicomponent.cb_cv_hsv_w)
-			spacing: 5.
-		children: [cv_hsv_sel, r_rgb_cur, 
-			ui.row(
-			widths: [20., ui.stretch] 
-			children: [lb_r, tb_r]),
-			ui.row(
-				widths: [20., ui.stretch]
-				children: [lb_g, tb_g]),
-			ui.row(
-				widths: [20., ui.stretch] 
-				children: [lb_b, tb_b]),
-		]),
-	])
+		children: [
+			cv_h,
+			cv_sv,
+			ui.column(
+				heights: [f64(uicomponent.cb_cv_hsv_h), uicomponent.cb_cv_hsv_w, ui.compact,
+					ui.compact, ui.compact]
+				widths: f64(uicomponent.cb_cv_hsv_w)
+				spacing: 5.0
+				children: [cv_hsv_sel, r_rgb_cur,
+					ui.row(
+					widths: [20.0, ui.stretch]
+					children: [lb_r, tb_r]
+				),
+					ui.row(
+						widths: [20.0, ui.stretch]
+						children: [lb_g, tb_g]
+					),
+					ui.row(
+						widths: [20.0, ui.stretch]
+						children: [lb_b, tb_b]
+					),
+				]
+			),
+		]
+	)
 	mut cb := &ColorBox{
 		layout: layout
 		cv_h: cv_h
@@ -188,7 +192,7 @@ fn cv_h_mouse_move(e ui.MouseMoveEvent, c &ui.CanvasLayout) {
 fn cv_h_draw(c &ui.CanvasLayout, app voidptr) {
 	cb := component_colorbox(c)
 	for j in 0 .. 255 {
-		c.draw_rect(0, j, 30, 1, cb.hsv_to_rgb(f64(j) / 256., .75, .75))
+		c.draw_rect(0, j, 30, 1, cb.hsv_to_rgb(f64(j) / 256.0, .75, .75))
 	}
 	c.draw_rounded_rect(-3, int(cb.h * 256) - 3, 36, 6, 2, cb.hsv_to_rgb(cb.h, .2, .7))
 	c.draw_rect(3, int(cb.h * 256) - 1, 24, 2, cb.hsv_to_rgb(cb.h, .75, .75))
@@ -201,8 +205,8 @@ fn cv_h_draw(c &ui.CanvasLayout, app voidptr) {
 
 fn cv_sv_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 	mut cb := component_colorbox(c)
-	cb.s = f64(e.x) / 255.
-	cb.v = 1. - f64(e.y) / 255.
+	cb.s = f64(e.x) / 255.0
+	cb.v = 1.0 - f64(e.y) / 255.0
 	cb.update_cur_color(true)
 	cb.update_sel_color()
 }
@@ -210,8 +214,8 @@ fn cv_sv_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 fn cv_sv_mouse_move(e ui.MouseMoveEvent, c &ui.CanvasLayout) {
 	if c.ui.btn_down[0] {
 		mut cb := component_colorbox(c)
-		cb.s = f64(e.x) / 255.
-		cb.v = 1. - f64(e.y) / 255.
+		cb.s = f64(e.x) / 255.0
+		cb.v = 1.0 - f64(e.y) / 255.0
 		cb.update_cur_color(true)
 	}
 }
@@ -221,10 +225,10 @@ fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 
 	c.draw_texture(256, 256, cb.simg)
 
-	c.draw_rounded_rect(int(cb.s * 256.) - 10, int((1. - cb.v) * 256.) - 10, 20, 20, 10,
-		cb.hsv_to_rgb(cb.h, 1 - cb.s, 1. - cb.v))
-	c.draw_rounded_rect(int(cb.s * 256.) - 7, int((1. - cb.v) * 256.) - 7, 14, 14, 7,
-		cb.hsv_to_rgb(cb.h, cb.s, cb.v))
+	c.draw_rounded_rect(int(cb.s * 256.0) - 10, int((1.0 - cb.v) * 256.0) - 10, 20, 20,
+		10, cb.hsv_to_rgb(cb.h, 1 - cb.s, 1.0 - cb.v))
+	c.draw_rounded_rect(int(cb.s * 256.0) - 7, int((1.0 - cb.v) * 256.0) - 7, 14, 14,
+		7, cb.hsv_to_rgb(cb.h, cb.s, cb.v))
 }
 
 fn cv_sel_key_down(e ui.KeyEvent, c &ui.CanvasLayout) {
@@ -259,7 +263,7 @@ fn cv_sel_click(e ui.MouseEvent, c &ui.CanvasLayout) {
 fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
 	cb := component_colorbox(c)
 	mut hsv := HSVColor{}
-	mut h, mut s, mut v := 0., 0., 0.
+	mut h, mut s, mut v := 0.0, 0.0, 0.0
 	ii, jj := cb.ind_sel % uicomponent.cb_nc, cb.ind_sel / uicomponent.cb_nc
 	c.draw_rounded_rect(uicomponent.cb_sp + ii * (uicomponent.cb_hsv_col + uicomponent.cb_sp) - 1,
 		uicomponent.cb_sp + jj * (uicomponent.cb_hsv_col + uicomponent.cb_sp) - 1,
@@ -304,7 +308,7 @@ pub fn (mut cb ColorBox) update_buffer() {
 	for y in 0 .. 256 {
 		for x in 0 .. 256 {
 			unsafe {
-				col = cb.hsv_to_rgb(cb.h, f64(x) / 255., 1. - f64(y) / 255.)
+				col = cb.hsv_to_rgb(cb.h, f64(x) / 255.0, 1.0 - f64(y) / 255.0)
 				buf[i] = col.r
 				buf[i + 1] = col.g
 				buf[i + 2] = col.b

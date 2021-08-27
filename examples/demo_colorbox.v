@@ -31,11 +31,13 @@ fn main() {
 		title: 'V UI: Toolbar'
 		state: app
 		native_message: false
-	children: [
-		ui.column(
-			heights: [ui.compact, ui.compact]
-		children: [cb_layout, rect]),
-	])
+		children: [
+			ui.column(
+				heights: [ui.compact, ui.compact]
+				children: [cb_layout, rect]
+			),
+		]
+	)
 	mut cb := uic.component_colorbox(cb_layout)
 	cb.connect(&rect.color)
 	app.window = window

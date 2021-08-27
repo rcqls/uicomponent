@@ -22,24 +22,31 @@ fn main() {
 		state: app
 		mode: .resizable
 		native_message: false
-		children:  [
-		ui.column(
-			margin_: .05
-			spacing: .05
-			heights: [8 * ui.stretch, ui.stretch, ui.stretch]
-			children:  [
-			ui.row(
-			spacing: .1
-			margin_: 5
-			widths: ui.stretch
-			children:  [
-			uic.doublelistbox(id: 'dlb1', title: 'dlb1', items: ['totto', 'titi']),
-			uic.doublelistbox(id: 'dlb2', title: 'dlb2', items: ['tottoooo', 'titi', 'tototta']),
-		]),
-			ui.button(id: 'btn1', text: 'get values for dlb1', onclick: btn_click),
-			ui.button(id: 'btn2', text: 'get values for dlb2', onclick: btn_click),
-		]),
-	])
+		children: [
+			ui.column(
+				margin_: .05
+				spacing: .05
+				heights: [8 * ui.stretch, ui.stretch, ui.stretch]
+				children: [
+					ui.row(
+					spacing: .1
+					margin_: 5
+					widths: ui.stretch
+					children: [
+						uic.doublelistbox(id: 'dlb1', title: 'dlb1', items: ['totto', 'titi']),
+						uic.doublelistbox(
+							id: 'dlb2'
+							title: 'dlb2'
+							items: ['tottoooo', 'titi', 'tototta']
+						),
+					]
+				),
+					ui.button(id: 'btn1', text: 'get values for dlb1', onclick: btn_click),
+					ui.button(id: 'btn2', text: 'get values for dlb2', onclick: btn_click),
+				]
+			),
+		]
+	)
 	app.window = window
 	ui.run(window)
 }

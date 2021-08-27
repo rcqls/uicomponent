@@ -27,7 +27,8 @@ pub fn toolbar(c ToolBarConfig) &ui.Stack {
 		heights: c.heights
 		spacing: c.spacing
 		spacings: c.spacings
-		children:  c.items)
+		children: c.items
+	)
 	tb := &ToolBar{
 		layout: layout
 		items: c.items

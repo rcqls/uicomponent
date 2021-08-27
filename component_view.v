@@ -8,30 +8,30 @@ import x.ttf
 [heap]
 struct View {
 pub mut:
-	layout    	&ui.CanvasLayout // required
-	tf        	map[string]ttf.TTF_File
-	ttf_render 	[]ttf.TTF_render_Sokol
-	texts		[]TextBlock
-	text_width	int = 500
-	text_height	int = 500
-	cut_lines	bool
+	layout      &ui.CanvasLayout // required
+	tf          map[string]ttf.TTF_File
+	ttf_render  []ttf.TTF_render_Sokol
+	texts       []TextBlock
+	text_width  int = 500
+	text_height int = 500
+	cut_lines   bool
 	// To become a component of a parent component
-	component 	voidptr
+	component voidptr
 }
 
 pub struct ViewConfig {
-	id    			string
-	color 			gx.Color = ui.no_color
-	items 			[]string
-	font_paths 		map[string]string
-	scrollview 		bool
-	width         	int
-	height        	int
-	full_width    	int = -1
-	full_height   	int = -1
-	z_index       	int
-	texts		  	[]TextBlock
-	cut_lines		bool = true
+	id          string
+	color       gx.Color = ui.no_color
+	items       []string
+	font_paths  map[string]string
+	scrollview  bool
+	width       int
+	height      int
+	full_width  int = -1
+	full_height int = -1
+	z_index     int
+	texts       []TextBlock
+	cut_lines   bool = true
 }
 
 pub fn view(c ViewConfig) &ui.CanvasLayout {
@@ -52,7 +52,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 		texts: c.texts
 		cut_lines: c.cut_lines
 	}
-	view.load_fonts(c.font_paths) 
+	view.load_fonts(c.font_paths)
 	// add bitmap
 	view.bitmap_init()
 	view.update_scale()
@@ -66,7 +66,7 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 }
 
 fn view_init(c &ui.CanvasLayout) {
-	println("view init ($c.x, $c.y)")
+	println('view init ($c.x, $c.y)')
 	mut v := component_view(c)
 	v.update_texts()
 }
@@ -76,7 +76,7 @@ fn view_draw(c &ui.CanvasLayout, state voidptr) {
 	for i, t in v.texts {
 		mut txt1 := &(v.ttf_render[i])
 		// println("i=$i")
-		txt1.bmp.justify = t.justify	
+		txt1.bmp.justify = t.justify
 		txt1.bmp.align = t.align
 		txt1.bmp.color = u32(t.color.rgba8())
 		txt1.destroy_texture()
@@ -107,10 +107,10 @@ fn (mut v View) bitmap_init() {
 	// TODO: ensure that a font exits
 	mut fontname := v.tf.keys()[0]
 	for mut t in v.texts {
-		if t.fontname == "" {
+		if t.fontname == '' {
 			t.fontname = fontname
 		}
-		v.ttf_render << &ttf.TTF_render_Sokol {
+		v.ttf_render << &ttf.TTF_render_Sokol{
 			bmp: &ttf.BitMap{
 				tf: &(v.tf[t.fontname])
 			}
@@ -140,24 +140,24 @@ fn (mut v View) update_scale() {
 
 pub struct TextBlock {
 mut:
-	text		[]string
+	text []string
 	// pos and size
-	x			[]int
-	y 			[]int
-	max_width 	int
-	x_end		int
-	y_end 		int
-	beside 		bool
+	x         []int
+	y         []int
+	max_width int
+	x_end     int
+	y_end     int
+	beside    bool
 	// style
-	fontname 	string
-	fontsize 	int	= 22
-	align		ttf.Text_align = .left
-	justify		bool
-	color		gx.Color	   = gx.black
+	fontname string
+	fontsize int = 22
+	align    ttf.Text_align = .left
+	justify  bool
+	color    gx.Color = gx.black
 }
 
 fn (mut tb TextBlock) join() string {
-	return tb.text.join_lines().replace("_CUTLINES_\n","")
+	return tb.text.join_lines().replace('_CUTLINES_\n', '')
 }
 
 fn (mut v View) update_texts() {
@@ -176,20 +176,19 @@ fn (mut v View) update_text_block(i int) {
 	mut text_block := &(v.texts[i])
 	text := text_block.join()
 	// println("text = $text")
-	
-	unsafe{
+
+	unsafe {
 		text_block.text.free()
 		text_block.x.free()
 		text_block.y.free()
 	}
-
 	// for i, _ in text_block.text {
 	// 	text_block.text.delete_last()
 	// }
 
 	mut new_text := []string{}
-	mut new_x 	 := []int{}
-	mut new_y 	 := []int{}
+	mut new_x := []int{}
+	mut new_y := []int{}
 
 	mut y_base := int((bmp.tf.y_max - bmp.tf.y_min) * bmp.scale)
 	// println('y_base: $y_base (($bmp.tf.y_max - $bmp.tf.y_min) * $bmp.scale)')
@@ -204,7 +203,7 @@ fn (mut v View) update_text_block(i int) {
 	mut y := 0
 
 	if i > 0 {
-		x, y = v.texts[i - 1].x_end, v.texts[i - 1].y_end 
+		x, y = v.texts[i - 1].x_end, v.texts[i - 1].y_end
 	}
 
 	mut offset_flag := f32(0) // default .left align
@@ -255,7 +254,8 @@ fn (mut v View) update_text_block(i int) {
 						bmp.space_cw = 0.0
 						w, _ = bmp.get_bbox(tmp_str)
 						left_offset = int((v.text_width - w) * offset_flag)
-						bmp.space_cw = get_justify_space_cw(tmp_str, w, v.text_width, space_cw)
+						bmp.space_cw = get_justify_space_cw(tmp_str, w, v.text_width,
+							space_cw)
 					} else {
 						bmp.space_cw = old_space_cw
 					}
@@ -280,7 +280,7 @@ fn (mut v View) update_text_block(i int) {
 			}
 		}
 	}
-	bmp.space_cw = old_space_cw	
+	bmp.space_cw = old_space_cw
 
 	text_block.text = new_text
 	text_block.x = new_x
