@@ -173,6 +173,8 @@ fn colorbox_init(layout &ui.Stack) {
 
 pub fn (mut cb ColorBox) connect(col &gx.Color) {
 	cb.linked = unsafe { col }
+	println("connect: $col")
+	cb.update_from_rgb((*col).r, (*col).g, (*col).b)
 }
 
 fn cv_h_click(e ui.MouseEvent, c &ui.CanvasLayout) {
@@ -223,7 +225,7 @@ fn cv_sv_mouse_move(e ui.MouseMoveEvent, c &ui.CanvasLayout) {
 fn cv_sv_draw(mut c ui.CanvasLayout, app voidptr) {
 	mut cb := component_colorbox(c)
 
-	c.draw_texture(256, 256, cb.simg)
+	c.draw_texture(cb.simg)
 
 	c.draw_rounded_rect(int(cb.s * 256.0) - 10, int((1.0 - cb.v) * 256.0) - 10, 20, 20,
 		10, cb.hsv_to_rgb(cb.h, 1 - cb.s, 1.0 - cb.v))
@@ -280,7 +282,7 @@ fn cv_sel_draw(mut c ui.CanvasLayout, app voidptr) {
 	}
 }
 
-fn (mut cb ColorBox) update_cur_color(reactive bool) {
+pub fn (mut cb ColorBox) update_cur_color(reactive bool) {
 	cb.r_rgb_cur.color = cb.hsv_to_rgb(cb.h, cb.s, cb.v)
 	if cb.linked != 0 {
 		unsafe {
@@ -294,7 +296,7 @@ fn (mut cb ColorBox) update_cur_color(reactive bool) {
 	}
 }
 
-fn (mut cb ColorBox) update_sel_color() {
+pub fn (mut cb ColorBox) update_sel_color() {
 	// cb.r_sel.color = cb.hsv_to_rgb(cb.h, cb.s, cb.v)
 	cb.hsv_sel[cb.ind_sel] = HSVColor{cb.h, cb.s, cb.v}
 }
@@ -326,14 +328,17 @@ pub fn (mut cb ColorBox) update_buffer() {
 
 fn tb_char(a voidptr, tb &ui.TextBox, cp u32) {
 	mut cb := component_colorbox(tb)
-	r := cb.txt_r.int()
+	r, g, b := cb.txt_r.int(), cb.txt_g.int(), cb.txt_b.int()
+	cb.update_from_rgb(r, g, b)
+}
+
+pub fn (mut cb ColorBox) update_from_rgb(r int, g int, b int) {
 	if 0 <= r && r < 256 {
-		g := cb.txt_g.int()
 		if 0 <= g && g < 256 {
-			b := cb.txt_b.int()
 			if 0 <= b && b < 256 {
 				h, s, v := cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
-				// println("hsv: ${r}, $g, $b ->  $h, $s, $v")
+				// 
+				println("hsv: ${r}, $g, $b ->  $h, $s, $v")
 				cb.h, cb.s, cb.v = h, s, v
 				cb.update_buffer()
 				cb.update_cur_color(false)
