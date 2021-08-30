@@ -173,7 +173,7 @@ fn colorbox_init(layout &ui.Stack) {
 
 pub fn (mut cb ColorBox) connect(col &gx.Color) {
 	cb.linked = unsafe { col }
-	println("connect: $col")
+	// println("connect: $col")
 	cb.update_from_rgb((*col).r, (*col).g, (*col).b)
 }
 
@@ -337,8 +337,7 @@ pub fn (mut cb ColorBox) update_from_rgb(r int, g int, b int) {
 		if 0 <= g && g < 256 {
 			if 0 <= b && b < 256 {
 				h, s, v := cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
-				// 
-				println("hsv: ${r}, $g, $b ->  $h, $s, $v")
+				// println("hsv: ${r}, $g, $b ->  $h, $s, $v")
 				cb.h, cb.s, cb.v = h, s, v
 				cb.update_buffer()
 				cb.update_cur_color(false)
