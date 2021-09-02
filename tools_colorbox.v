@@ -21,12 +21,11 @@ pub fn colorbox_add(mut w ui.Window) {
 }
 
 // to connect the colorbox to gx.Color reference
-pub fn colorbox_connect(w &ui.Window, col &gx.Color, x int, y int) {
+pub fn colorbox_connect(w &ui.Window, col &gx.Color) {
 	mut s := w.subwindow(uicomponent.colorbox_id)
 	cb_layout := w.stack(uicomponent.colorbox_layout_id)
 	mut cb := component_colorbox(cb_layout)
 	cb.connect(col)
-	s.set_pos(x, y)
 	s.set_visible(s.hidden)
 	s.update_layout()
 }
@@ -62,5 +61,6 @@ pub fn button_color(c ButtonColorConfig) &ui.Button {
 }
 
 fn button_color_click(a voidptr, b &ui.Button) {
-	colorbox_connect(b.ui.window, b.bg_color, b.x, b.y)
+	colorbox_connect(b.ui.window, b.bg_color)
+	// , b.x, b.y)
 }

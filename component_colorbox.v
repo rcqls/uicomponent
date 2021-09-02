@@ -178,8 +178,6 @@ fn colorbox_init(layout &ui.Stack) {
 
 pub fn (mut cb ColorBox) connect(col &gx.Color) {
 	cb.linked = unsafe { col }
-	// println("connect: $col")
-	cb.update_from_rgb((*col).r, (*col).g, (*col).b)
 }
 
 fn cv_h_click(e ui.MouseEvent, c &ui.CanvasLayout) {
