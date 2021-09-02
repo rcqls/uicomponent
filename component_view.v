@@ -58,11 +58,14 @@ pub fn view(c ViewConfig) &ui.CanvasLayout {
 	view.update_scale()
 	// link to one component all the components
 	ui.component_connect(view, layout)
-	layout.component_type = 'View'
 	// init component
 	layout.component_init = view_init
 	// This needs to be added to the children tree
 	return layout
+}
+
+pub fn component_view(w ui.ComponentChild) &View {
+	return &View(w.component)
 }
 
 fn view_init(c &ui.CanvasLayout) {

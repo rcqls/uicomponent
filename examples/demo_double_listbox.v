@@ -54,7 +54,6 @@ fn main() {
 fn btn_click(a voidptr, b &ui.Button) {
 	dlbname := if b.id == 'btn1' { 'dlb1' } else { 'dlb2' }
 	s := b.ui.window.stack(dlbname)
-	println('$s.component_type()')
 	dlb := uic.component_doublelistbox(s)
 	res := 'result(s) of $dlbname : $dlb.values()'
 	println(res)

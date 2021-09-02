@@ -63,9 +63,13 @@ pub fn doublelistbox(c DoubleListBoxConfig) &ui.Stack {
 	// link to one component all the components
 	ui.component_connect(dbl_lb, layout, lb_left, lb_right, btn_left, btn_right, btn_clear)
 
-	layout.component_type = 'DoubleListBox'
 	// This needs to be added to the children tree
 	return layout
+}
+
+// component common access
+pub fn component_doublelistbox(w ui.ComponentChild) &DoubleListBox {
+	return &DoubleListBox(w.component)
 }
 
 // callback
@@ -81,7 +85,7 @@ fn doublelistbox_move_left(a voidptr, btn &ui.Button) {
 	mut dlb := component_doublelistbox(btn)
 	if dlb.lb_right.is_selected() {
 		_, item := dlb.lb_right.selected() or { '', '' }
-		if !(item in dlb.lb_left.values()) {
+		if item !in dlb.lb_left.values() {
 			dlb.lb_left.add_item(item, item)
 			dlb.lb_right.remove_item(item)
 		}
@@ -93,7 +97,7 @@ fn doublelistbox_move_right(a voidptr, btn &ui.Button) {
 	if dlb.lb_left.is_selected() {
 		_, item := dlb.lb_left.selected() or { '', '' }
 		// println("move >> $item")
-		if !(item in dlb.lb_right.values()) {
+		if item !in dlb.lb_right.values() {
 			dlb.lb_right.add_item(item, item)
 			dlb.lb_left.remove_item(item)
 		}

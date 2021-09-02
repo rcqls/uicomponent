@@ -105,6 +105,10 @@ pub fn tabs(c TabsConfig) &ui.Stack {
 	return layout
 }
 
+pub fn component_tabs(w ui.ComponentChild) &Tabs {
+	return &Tabs(w.component)
+}
+
 fn tabs_init(layout &ui.Stack) {
 	mut tabs := component_tabs(layout)
 	for id, mut page in tabs.pages {

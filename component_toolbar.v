@@ -44,3 +44,8 @@ pub fn toolbar(c ToolBarConfig) &ui.Stack {
 	}
 	return layout
 }
+
+// component access
+pub fn component_toolbar(w ui.ComponentChild) &ToolBar {
+	return &ToolBar(w.component)
+}

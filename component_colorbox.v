@@ -156,6 +156,11 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 	return layout
 }
 
+// component access
+pub fn component_colorbox(w ui.ComponentChild) &ColorBox {
+	return &ColorBox(w.component)
+}
+
 // equivalent of init method for widget
 // automatically called in by the layout
 fn colorbox_init(layout &ui.Stack) {
