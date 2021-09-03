@@ -31,7 +31,3 @@ pub fn fontchooser_subwindow(w &ui.Window) &ui.SubWindow {
 pub fn fontchooser_listbox(w &ui.Window) &ui.ListBox {
 	return w.listbox(fontchooser_lb_id)
 }
-
-fn btn_font_click(a voidptr, b &ui.Button) {
-	fontchooser_visible(b.ui.window)
-}

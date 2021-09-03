@@ -4,13 +4,13 @@ import ui
 import gx
 
 [heap]
-struct FontButton {
+struct ButtonFont {
 pub mut:
 	btn &ui.Button
 	dtw ui.DrawTextWidget
 }
 
-pub struct FontButtonConfig {
+pub struct ButtonFontConfig {
 	id           string
 	dtw          ui.DrawTextWidget = ui.canvas_plus()
 	text         string
@@ -24,7 +24,7 @@ pub struct FontButtonConfig {
 	bg_color     &gx.Color = 0
 }
 
-pub fn fontbutton(c FontButtonConfig) &ui.Button {
+pub fn button_font(c ButtonFontConfig) &ui.Button {
 	b := &ui.Button{
 		id: c.id
 		text: c.text
@@ -34,12 +34,12 @@ pub fn fontbutton(c FontButtonConfig) &ui.Button {
 		bg_color: c.bg_color
 		theme_cfg: ui.no_theme
 		tooltip: ui.TooltipMessage{c.tooltip, c.tooltip_side}
-		onclick: fontbutton_click
+		onclick: button_font_click
 		radius: f32(c.radius)
 		padding: f32(c.padding)
 		ui: 0
 	}
-	mut fb := &FontButton{
+	mut fb := &ButtonFont{
 		btn: b
 		dtw: c.dtw
 	}
@@ -47,12 +47,12 @@ pub fn fontbutton(c FontButtonConfig) &ui.Button {
 	return b
 }
 
-pub fn component_fontbutton(w ui.ComponentChild) &FontButton {
-	return &FontButton(w.component)
+pub fn component_button_font(w ui.ComponentChild) &ButtonFont {
+	return &ButtonFont(w.component)
 }
 
-fn fontbutton_click(a voidptr, b &ui.Button) {
-	fb := component_fontbutton(b)
+fn button_font_click(a voidptr, b &ui.Button) {
+	fb := component_button_font(b)
 	// println('fb_click $fb.dtw.id')
 	fontchooser_connect(b.ui.window, fb.dtw)
 	fontchooser_visible(b.ui.window)
