@@ -26,6 +26,7 @@ pub fn colorbox_connect(w &ui.Window, col &gx.Color) {
 	cb_layout := w.stack(uicomponent.colorbox_layout_id)
 	mut cb := component_colorbox(cb_layout)
 	cb.connect(col)
+	cb.update_from_rgb(col.r, col.g, col.b)
 	s.set_visible(s.hidden)
 	s.update_layout()
 }
@@ -60,7 +61,13 @@ pub fn button_color(c ButtonColorConfig) &ui.Button {
 	return b
 }
 
-fn button_color_click(a voidptr, b &ui.Button) {
+fn button_color_click(a voidptr, mut b ui.Button) {
 	colorbox_connect(b.ui.window, b.bg_color)
-	// , b.x, b.y)
+	// move only if s.x and s.y == 0 first use
+	mut s := b.ui.window.subwindow(uicomponent.colorbox_id)
+	if s.x == 0 && s.y == 0 {
+		w, h := b.size()
+		s.set_pos(b.x + w / 2, b.y + h / 2)
+		s.update_layout()
+	}
 }

@@ -7,7 +7,7 @@ const (
 )
 
 // Append fontchooser to window
-pub fn fontchooser_add(mut w ui.Window, fontchooser_lb_change ui.ListBoxSelectionChangedFn) {
+pub fn fontchooser_add(mut w ui.Window) { //}, fontchooser_lb_change ui.ListBoxSelectionChangedFn) {
 	// only once
 	if !ui.Layout(w).has_child_id(uicomponent.fontchooser_id) {
 		w.children << ui.subwindow(

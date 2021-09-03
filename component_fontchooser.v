@@ -70,15 +70,13 @@ fn fontchooser_add_fonts_items(mut lb ui.ListBox) {
 pub fn fontchooser_connect(w &ui.Window, dtw ui.DrawTextWidget) {
 	fc_layout := w.stack(uicomponent.fontchooser_row_id)
 	mut fc := component_fontchooser(fc_layout)
-	println('fc connect $dtw.id')
 	fc.dtw = dtw
-	println('fc connect2 $fc.dtw.id')
 }
 
 fn fontchooser_lb_change(a voidptr, lb &ui.ListBox) {
 	mut w := lb.ui.window
 	fc := component_fontchooser(lb)
-	println('fc_lb_change: $lb.id')
+	// println('fc_lb_change: $lb.id')
 	mut dtw := ui.DrawTextWidget(fc.dtw)
 	fp, id := lb.selected() or { 'classic', '' }
 	// println("$id, $fp")

@@ -339,8 +339,10 @@ pub fn (mut cb ColorBox) update_from_rgb(r int, g int, b int) {
 	if 0 <= r && r < 256 {
 		if 0 <= g && g < 256 {
 			if 0 <= b && b < 256 {
-				h, s, v := cb.rgb_to_hsv(gx.rgb(byte(r), byte(g), byte(b)))
-				// println("hsv: ${r}, $g, $b ->  $h, $s, $v")
+				col := gx.rgb(byte(r), byte(g), byte(b))
+				// println("ggggg $r, $g, $b ${col}")
+				h, s, v := cb.rgb_to_hsv(col)
+				// println("hsv: $r, $g, $b ->  $h, $s, $v")
 				cb.h, cb.s, cb.v = h, s, v
 				cb.update_buffer()
 				cb.update_cur_color(false)

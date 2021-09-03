@@ -53,7 +53,7 @@ pub fn component_fontbutton(w ui.ComponentChild) &FontButton {
 
 fn fontbutton_click(a voidptr, b &ui.Button) {
 	fb := component_fontbutton(b)
-	println('fb_click $fb.dtw.id')
+	// println('fb_click $fb.dtw.id')
 	fontchooser_connect(b.ui.window, fb.dtw)
 	fontchooser_visible(b.ui.window)
 }
