@@ -12,9 +12,8 @@ const (
 pub fn colorbox_add(mut w ui.Window) {
 	// only once
 	if !ui.Layout(w).has_child_id(uicomponent.colorbox_id) {
-		w.children << ui.subwindow(
+		w.subwindows << ui.subwindow(
 			id: uicomponent.colorbox_id
-			z_index: 1000
 			layout: colorbox(id: uicomponent.colorbox_layout_id, light: true, hsl: false)
 		)
 	}
@@ -39,7 +38,7 @@ pub struct ButtonColorConfig {
 	z_index      int
 	tooltip      string
 	tooltip_side ui.Side = .top
-	radius       f64
+	radius       f64     = .25
 	padding      f64
 	bg_color     &gx.Color
 }

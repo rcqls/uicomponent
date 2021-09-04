@@ -10,9 +10,8 @@ const (
 pub fn fontchooser_add(mut w ui.Window) { //}, fontchooser_lb_change ui.ListBoxSelectionChangedFn) {
 	// only once
 	if !ui.Layout(w).has_child_id(uicomponent.fontchooser_id) {
-		w.children << ui.subwindow(
+		w.subwindows << ui.subwindow(
 			id: uicomponent.fontchooser_id
-			z_index: 1000
 			layout: fontchooser()
 		)
 	}

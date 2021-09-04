@@ -34,7 +34,7 @@ pub fn fontchooser(c FontChooserConfig) &ui.Stack {
 	layout := ui.row(
 		id: uicomponent.fontchooser_row_id
 		widths: 300.0
-		heights: 300.0
+		heights: 200.0
 		children: [lb]
 	)
 	mut fc := &FontChooser{
