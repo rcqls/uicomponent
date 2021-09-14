@@ -58,6 +58,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct ColorBoxConfig {
 	id    string
 	light bool

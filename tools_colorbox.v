@@ -30,6 +30,7 @@ pub fn colorbox_connect(w &ui.Window, col &gx.Color) {
 	s.update_layout()
 }
 
+[params]
 pub struct ButtonColorConfig {
 	id           string
 	text         string

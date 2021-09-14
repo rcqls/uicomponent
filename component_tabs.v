@@ -25,6 +25,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct TabsConfig {
 	id          string
 	mode        Mode = .vertical

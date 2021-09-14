@@ -15,6 +15,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct DoubleListBoxConfig {
 	id    string
 	title string

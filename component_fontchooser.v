@@ -17,6 +17,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct FontChooserConfig {
 	id         string = uicomponent.fontchooser_lb_id
 	draw_lines bool   = true
@@ -59,6 +60,9 @@ fn fontchooser_add_fonts_items(mut lb ui.ListBox) {
 	}
 	$if linux {
 		font_root_path = '/usr/share/fonts/truetype/*'
+	}
+	$if android {
+		font_root_path = '/system/fonts/*'
 	}
 	font_paths := os.glob('$font_root_path/*.ttf') or { panic(err) }
 

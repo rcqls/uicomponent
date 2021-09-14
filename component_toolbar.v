@@ -11,6 +11,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct ToolBarConfig {
 	id       string
 	widths   ui.Size

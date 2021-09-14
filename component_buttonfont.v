@@ -10,6 +10,7 @@ pub mut:
 	dtw ui.DrawTextWidget
 }
 
+[params]
 pub struct ButtonFontConfig {
 	id           string
 	dtw          ui.DrawTextWidget = ui.canvas_plus()

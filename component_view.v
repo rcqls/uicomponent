@@ -19,6 +19,7 @@ pub mut:
 	component voidptr
 }
 
+[params]
 pub struct ViewConfig {
 	id          string
 	color       gx.Color = ui.no_color
