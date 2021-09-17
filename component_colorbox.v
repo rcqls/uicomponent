@@ -91,9 +91,9 @@ pub fn colorbox(c ColorBoxConfig) &ui.Stack {
 		on_click: cv_sel_click
 		on_key_down: cv_sel_key_down
 	)
-	mut tb_r := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
-	mut tb_g := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
-	mut tb_b := ui.textbox(text_after: true, is_numeric: true, on_char: tb_char)
+	mut tb_r := ui.textbox(is_numeric: true, on_char: tb_char)
+	mut tb_g := ui.textbox(is_numeric: true, on_char: tb_char)
+	mut tb_b := ui.textbox(is_numeric: true, on_char: tb_char)
 	lb_r := ui.label(text: 'R:')
 	lb_g := ui.label(text: 'G:')
 	lb_b := ui.label(text: 'B:')
